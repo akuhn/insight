@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'json'
 require 'time'
+require 'date'
 require 'pry'
 require 'set'
 
@@ -15,12 +16,9 @@ class Hash
   end
 end
 
-class Hash
-  def method_missing(sym,*args)
-    fetch(sym){fetch(sym.to_s){super}}
-  end
-  def id
-    self[:id] or self['id'] or raise
+class String
+  def exist?
+    File.exist?(self)
   end
 end
 
@@ -32,6 +30,17 @@ module Enumerable
     h = Hash.new(0)
     each{|each|h[yield(each)]+=1}
     h.sort_by{|k,count|count}.reverse
+  end
+  def split_where # {|a,b|}
+    runs = [[first]]
+    each_cons(2){|a,b|
+      runs << [] if yield(a,b)
+      runs.last << b
+    }
+    return runs 
+  end
+  def any
+    shuffle.first
   end
 end
 
@@ -47,10 +56,10 @@ end
 
 photos = []
 
-for n in 1..17 do
-  fname = "vancouver-3y-p#{'%03d'%n}.json"
-  data = JSON.parse(File.read(fname),:symbolize_names=>true)
-  photos += data.photos.photo # sic
+for date in Date.civil(2010,1,1)...Date.civil(2013,1,1) do
+  fname = "vancouver-#{date}.json"
+  break unless fname.exist?
+  photos += JSON.parse(File.read(fname),:symbolize_names=>true)
 end
 
 photos = photos.uniq
@@ -64,9 +73,13 @@ puts photos.size
 
 users = photos.group_by(&:owner).values.sort_by(&:size).reverse.take(20)
 
-us = users.first
+us = users.drop(3).first
 
 p us.first.ownername
 
-p us.sort_by(&:datetaken).each_cons(2).collect{|a,b|b.datetaken-a.datetaken}.sort
+# p us.sort_by(&:datetaken).
 
+trails = us.sort_by(&:datetaken).split_where{|a,b|(b.datetaken - a.datetaken) > 360}
+p trails.collect{|ms|ms.each_cons(2).collect{|a,b|(b.datetaken-a.datetaken).to_i}}
+
+p trails.select{|ms|ms.size > 3}.collect{|ms|ms.collect(&:tags).join(' ').scan(/[a-zA-Z]+/).uniq.sort.join(' ')}
