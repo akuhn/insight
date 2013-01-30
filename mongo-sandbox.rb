@@ -2,16 +2,14 @@ require 'rubygems'
 require 'mongo'
 require 'json'
 require 'set'
+require 'monkey_patching'
 
 mongo = Mongo::MongoClient.new()
 db = mongo['4h']
-eg = db['vancouver']
+Paths = db['vancouver_paths']
 
-puts "Found #{eg.size} entries."
+puts "Found #{Paths.size} entries."
 
-# Remove duplicate
-
-users = eg.distinct(:owner)
-
-p users.size
-p eg.find({ :owner => users.first }).count
+p Paths.find.to_a.collect{|each|
+  each.path.collect{|photo|[photo.latitude,photo.longitude]}
+}
