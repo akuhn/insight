@@ -41,7 +41,7 @@ class Flicker
     params = {
       :lat => location[:lat],
       :lon => location[:lon],
-      :radius => 15,
+      :radius => location[:radius],
       :sort => 'date-taken-desc',
       :min_taken_date => date.to_s,
       :max_taken_date => (date+1).to_s
@@ -58,12 +58,17 @@ class Flicker
   end  
 end
 
-Vancouver = { :lat => 49.25, :lon => -123.1 }
+Vancouver = { :lat => 49.25, :lon => -123.1, :radius => 15 }
+Rome = { :lat => 41.9, :lon => 12.5, :radius => 10, :name => 'rome' }
+Paris = { :lat => 48.8742, :lon => 2.3470, :radius => 10, :name => 'paris' }
+Sanfran = { :lat => 37.775, :lon => -122.4183, :radius => 10, :name => 'sanfran' }
 
+
+city = Paris
 for date in Date.civil(2010,1,1)...Date.civil(2013,1,1) do
-  fname = "vancouver-#{date}.json"
+  fname = "data/#{city.name}-#{date}.json"
   next if fname.exist?
   puts "Fetching #{fname}..."
-  photos = Flicker.geo_search(Vancouver,date)
+  photos = Flicker.geo_search(city,date)
   File.open(fname,'w'){|f|JSON.dump(photos,f)}
 end
