@@ -21,7 +21,6 @@
         };
         var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 		
-		console.log(paths)
 		paths.forEach(function(path) {
 			var polyline = []
 			path.forEach(function(each) {
@@ -34,6 +33,16 @@
 	          strokeWeight: 1
 	        }).setMap(map);
 		})
+		
+		points.forEach(function(each) {
+			if (each.category != 'sights') return
+	        var marker = new google.maps.Marker({
+	            position: new google.maps.LatLng(each.latitude,each.longitude),
+	            map: map,
+	            title: each.name
+	        });
+		})
+		
       }
     </script>
   </head>
