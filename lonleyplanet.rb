@@ -33,16 +33,17 @@ def scrape_points_of_interest!
     locations = JSON.parse(doc.search('head script').last.content[/\[\{.*\}\]/])
     doc.search('ol > li').each do |li|
       next if li['class'] == 'advertisingItem'
-      data = {
+      p data = {
         :name => li.at('h2 a').content,
         :url => 'http://www.lonelyplanet.com' << li.at('h2 a')['href'],
-        :type => li.search('.poiType a').collect{|m|m['href']}.collect{|m|m.split('/')[-1]},
-        :location => li.search('.poiLocation a').collect{|m|m['href']}.collect{|m|m.split('/')[-2]},
+        :category => li.search('.poiType a')[0]['href'].split('/')[-1],
+        :subcategory => li.search('.poiType a')[1]['href'].split('/')[-1],
+        :location => li.search('.poiLocation a').collect{|m|m['href'].split('/')[-2]},
         :description => li.at('.listDesc p').content,
         :reviewed => !!li.at('.reviewed'),
         :thumbs => { 
-          :up => li.at('.thumbs .up').content,
-          :down => li.at('.thumbs .down').content
+          :up => li.at('.thumbs .up').content.to_i,
+          :down => li.at('.thumbs .down').content.to_i
         }
       }
       more = locations.detect{|m|m.name == data.name}
@@ -55,3 +56,5 @@ def scrape_points_of_interest!
     end
   end
 end
+
+# scrape_points_of_interest!
