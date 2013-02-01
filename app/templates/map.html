@@ -21,7 +21,7 @@
         };
         var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 		
-		$.getJSON('/vancouver/paths.json', function(data) { 
+		$.getJSON('/vancouver/paths', function(data) { 
 			data.paths.forEach(function(path) {
 				var polyline = []
 				path.forEach(function(each) {
@@ -36,13 +36,15 @@
 			})
 		})
 		
-		points.forEach(function(each) {
-			if (each.category != 'sights') return
-	        var marker = new google.maps.Marker({
-	            position: new google.maps.LatLng(each.latitude,each.longitude),
-	            map: map,
-	            title: each.name
-	        });
+		$.getJSON('/vancouver/sights', function(data) {
+			data.sights.forEach(function(each) {
+				if (each.category != 'sights') return
+		        var marker = new google.maps.Marker({
+		            position: new google.maps.LatLng(each.latitude,each.longitude),
+		            map: map,
+		            title: each.name
+		        })
+			})
 		})
 		
       }
@@ -69,6 +71,72 @@
 	   <div id="map_canvas" style="width: 100%; height: 100%;"></div>
 	   <div id="over_map">
 		   <h1>Adrian's Day in Vancouver</h1>
+		   <pre style="height:80%;overflow:scroll;">
+160	UBC Thunderbird Arena
+105	GM Place
+80	Vancouver Aquarium
+70	Botanical Garden
+70	City Hall
+60	Bloedel Floral Conservatory
+60	Vandusen Botanical Garden
+60	David Lam Park
+55	BC Place Stadium
+50	Dr Sun Yat-Sen Classical Chinese Garden &amp; Park
+45	BC Sports Hall of Fame &amp; Museum
+40	Granville Island Public Market
+40	Roundhouse Community Arts &amp; Recreation Centre
+40	HR MacMillan Space Centre
+40	Capilano Suspension Bridge
+35	Maple Tree Square
+35	Vancouver Museum
+30	Grandview Park
+30	Second Beach &amp; Third Beach
+30	Vancouver Lookout
+25	Richmond Olympic Oval
+25	Vancouver Public Library
+25	Sunset Beach
+20	Vancouver Maritime Museum
+20	Pendulum Gallery
+20	Queen Elizabeth Park
+20	Woodward's
+20	English Bay Beach
+15	Waterfront Station
+15	Robson Street
+15	Steam Clock
+15	Science World
+15	Morris and Helen Belkin Gallery
+15	Brockton Point
+15	Model Trains Museum &amp; Model Ships Museum
+15	University of British Columbia
+15	Chinese Cultural Centre Museum &amp; Archives
+15	South False Creek Seawall
+15	Canada Place
+10	Prospect Point
+10	Roedde House Museum
+10	Sam Kee Building
+10	Seawall Promenade
+10	Lumberman's Arch
+10	Science World &amp; Alcan Omnimax Theatre
+10	Emily Carr University of Art + Design
+10	Vancouver Art Gallery
+10	Marine Building
+5	Spanish Banks
+5	Hastings Mill Store Museum
+5	Miniature Railway &amp; Children's Farmyard
+5	Lost Lagoon Nature House
+5	Christ Church Cathedral
+5	Contemporary Art Gallery
+5	Beaty Biodiversity Museum
+5	Kitsilano Beach
+5	Coal Harbour Seawall
+5	University Town
+0	Bill Reid Gallery of Northwest Coast Art
+0	Lost Lagoon
+0	Vanier Park
+0	Downtown Historic Railway
+0	Vancouver Police Centennial Museum
+0	Vancouver Olympic Centre
+		   </pre>	   
 	   </div>
 	</div>
 	
