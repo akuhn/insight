@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<style type="text/css">
+		html { height: 100% }
+		body { height: 100%; margin: 0; padding: 0 }
+		#map_canvas { height: 100% }
+	</style>	  
+    <script src="//maps.googleapis.com/maps/api/js?sensor=false"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+	<script src="paths.pjson"></script>
+    <script>
+      function initialize() {
+        var mapOptions = {
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
+          center: new google.maps.LatLng(49.29, -123.08),
+          zoom: 13,
+ 		  disableDefaultUI: true,
+		  zoomControl: true,
+		  panControl: true
+        };
+        var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+		
+		$.getJSON('/vancouver/paths.json', function(data) { 
+			data.paths.forEach(function(path) {
+				var polyline = []
+				path.forEach(function(each) {
+					polyline.push(new google.maps.LatLng(each[0],each[1]))
+				})
+		        new google.maps.Polyline({
+		          path: polyline,
+		          strokeColor: '#FF0000',
+		          strokeOpacity: 0.5,
+		          strokeWeight: 1
+		        }).setMap(map);
+			})
+		})
+		
+		points.forEach(function(each) {
+			if (each.category != 'sights') return
+	        var marker = new google.maps.Marker({
+	            position: new google.maps.LatLng(each.latitude,each.longitude),
+	            map: map,
+	            title: each.name
+	        });
+		})
+		
+      }
+    </script>
+  </head>
+  <body onload="initialize()">
+  	<style>
+	#over_map {
+		position: absolute;
+		top: 20px;
+		right: 20px;
+		z-index: 99;
+		background: 
+		white;
+		padding: 10px;
+		border: 1px solid grey;
+		box-shadow: 2px 2px 2px gray;
+		border-radius: 4px;
+		width: 40%;
+		height: 80%;
+	}  	
+	</style>
+  	<div id="wrapper" style="width: 100%; height: 100%;">
+	   <div id="map_canvas" style="width: 100%; height: 100%;"></div>
+	   <div id="over_map">
+		   <h1>Adrian's Day in Vancouver</h1>
+	   </div>
+	</div>
+	
+  </body>
+</html>
