@@ -19,43 +19,39 @@ def Points.nearest(lat,lon)
   return t.min{|a,b|a.last<=>b.last}
 end
 
-data = []
 Paths.find do |cursor|
-  cursor.take(10).each do |data|
-    curr = :begin
+  travel = Hash.new{|h,k|h[k]=Hash.new{|h,k|h[k]=[]}}
+  sights = Hash.new{|h,k|h[k]=[]}
+  cursor.take(10000).each do |data|
     runs = []
-    data.path.each do |photo|
-      point,dist = Points.nearest(photo.latitude,photo.longitude)
-      key = dist > 0.1 ? nil : point.name # get poi_id from lonley planet!
-      runs << {:poi=>key,:photos=>[]} if curr != key
-      runs.last.photos << photo
-      curr = key
-    end
-    runs.each do |each|
-      each[:duration] = each.photos.last.datetaken - each.photos.first.datetaken
-      each[:transition] = nil
-    end
-    runs.each_cons(2) do |a,b|
-      a[:transition] = {
-        :destination => b.poi,
-        :duration => b.photos.first.datetaken - a.photos.last.datetaken
-      }
-    end
-    p runs.collect(&:poi)
-    p runs.collect(&:duration)
-    p runs[1...-1].collect(&:transition).collect(&:duration)
+    # find nearest POI 
+    data.path.each{|photo|
+      poi,dist = Points.nearest(photo.latitude,photo.longitude)
+      photo[:poi] = poi
+      photo[:dist] = (dist*1000).to_i
+      photo[:poi_name] = photo.dist > 100 ? nil : photo.poi.name
+    }
+    # group photos by POI
+    t = data.path.split_where{|a,b|a.poi_name != b.poi_name}
+    t = t.reject{|g|g.any.poi_name.nil?}
+    # compute duration of stay at POI
+    t.collect{|g|
+      sights[g.any.poi_name] << g.last.datetaken - g.first.datetaken
+    }
+    # computer travel time between POIs
+    t.each_cons(2){|a,b|
+      travel[a.any.poi_name][b.any.poi_name] << b.first.datetaken - a.last.datetaken
+    }
   end
+  p data = {
+    :transitions => travel,
+    :sights => sights,
+    :city => 'vancouver'
+  }
+  db['graph'].insert(data)
 end
-
 
 p :done
+
+
 __END__
-    
-data.path.each do |photo| 
-  loc = [photo.latitude,photo.longitude]
-end
-#p [xx.collect(&:last).uniq.compact.size,xx.size]
-found += xx.collect(&:last).uniq.compact if xx.collect(&:last).uniq.compact.size > 1
-#p xx
-#p '-' * 40
-#exit if (n += 1) > 50

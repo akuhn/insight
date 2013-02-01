@@ -28,7 +28,16 @@ module Enumerable
     return runs 
   end
   def any
+    first
+  end
+  def sample
     shuffle.first
+  end
+end
+
+class Array
+  def but_last
+    self[0...-1]
   end
 end
 
