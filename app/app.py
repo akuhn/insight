@@ -7,6 +7,10 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
+    return render_template('index.html')
+
+@app.route('/vancouver')
+def vancouver():
     return render_template('map.html')
 
 @app.route('/vancouver/paths')
@@ -27,3 +31,4 @@ def vancouver_sights():
 if __name__ == '__main__':
     app.debug=True
     app.run()
+    #app.run(host='192.168.1.17',port=1234)

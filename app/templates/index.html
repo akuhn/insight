@@ -1,0 +1,88 @@
+<html>
+<head>
+	<link href="static/bootstrap/css/bootstrap.css" rel="stylesheet">
+	<style>
+		body {
+			background: url(static/img/fbcover-vancouver.jpg);
+			background-size: cover;
+	        padding-top: 60px;
+	        padding-bottom: 40px;
+		}
+		.navbar-inverse .navbar-inner {
+			background-color: #08111D;
+		}
+		.container, .navbar-fixed-top .container {
+			width: 720px;
+		}
+        .jumbotron {
+          margin: 20px 0;
+          text-align: center;
+		  background: -webkit-radial-gradient(circle, 
+			  rgba(104, 165, 203, 0.7), 
+			  rgba(104, 165, 203, 0.5));
+		  border-radius: 12px;
+		  color: white;
+		  text-shadow: 0px 2px 2px #68A5CB;
+        }
+        .jumbotron h1 {
+          font-size: 72px;
+          line-height: 1;
+        }
+		.jumbotron p.lead {
+			margin-top: 24px;
+			margin-bottom: 72px;
+		}
+        .jumbotron .btn {
+          font-size: 21px;
+          padding: 14px 24px;
+        }
+		
+		/* #B4DDEF, #9FD1E8, #68A5CB, #08111D */
+		/* .., rgba(159, 209, 232, 0.9), rgba(104, 165, 203, 0.5),.. */
+		
+	</style>
+</head>
+<body>
+	
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">Serendipty Engine</a>
+          <div class="nav-collapse collapse pull-right">
+            <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#contact">Contact</a></li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li><a href="#">Action</a></li>
+                  <li><a href="#">Another action</a></li>
+                  <li><a href="#">Something else here</a></li>
+                  <li class="divider"></li>
+                  <li class="nav-header">Nav header</li>
+                  <li><a href="#">Separated link</a></li>
+                  <li><a href="#">One more separated link</a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+	
+    <div class="container">
+		<div class="jumbotron hero-unit">
+			<h1>One Day in Town?</h1>
+			<p class="lead">We got you covered. Get your personalized day now!</p>
+			<a class="btn btn-large btn-success" href="/vancouver">Connect with Facebook</a>
+		</div>
+    </div>
+
+</body>		
+</html>
