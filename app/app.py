@@ -12,9 +12,7 @@ def hello_world():
 @app.route('/vancouver')
 def vancouver():
     return render_template('map.html', itinerary=[
-        {'title':'A','time':25,'sight':True},
-        {'title':'B','time':15},
-        {'title':'C','time':30,'sight':True},
+        {'name': 'Vanier Park', 'time': 0}, {'time': 15}, {'name': u'HR MacMillan Space Centre', 'time': 5}, {'time': 10}, {'name': u'Vancouver Maritime Museum', 'time': 15}, {'time': 30}, {'name': u'Granville Island Public Market', 'time': 30}, {'time': 100}, {'name': u'South False Creek Seawall', 'time': 5}, {'time': 20}, {'name': u'Steam Clock', 'time': 10}, {'time': 30}, {'name': u'Marine Building', 'time': 5}, {'time': 30}, {'name': u'Christ Church Cathedral', 'time': 5}, {'time': 40}, {'name': u'Roedde House Museum', 'time': 10}, {'time': 65}, {'name': u'Second Beach & Third Beach', 'time': 5}, {'time': 30}, {'name': u'Lost Lagoon Nature House', 'time': 5}, {'time': 90}, {'name': u'Miniature Railway & Children\u2019s Farmyard', 'time': 5}, {'time': 20}, {'name': u'Brockton Point', 'time': 10}, {'time': 25}, {'name': u'Waterfront Station', 'time': 10}, {'time': 25}, {'name': u'Vancouver Art Gallery', 'time': 5}, {'time': 45}, {'name': u'Contemporary Art Gallery', 'time': 5}, {'time': 20}, {'name': u'Sunset Beach', 'time': 5}, {'time': 5}, {'name': u'Maple Tree Square', 'time': 10}, {'time': 5}, {'name': u'Dr Sun Yat-Sen Classical Chinese Garden & Park', 'time': 30}, {'time': 10}
     ])
 
 @app.route('/vancouver/paths')
