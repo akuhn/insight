@@ -60,15 +60,40 @@
 	
 	<div class="container">
 		<div class="row">
-			<div class="span6">
-				<div class="square">
+			<div class="span5">
+				<div class="square" style="margin-top:16px">
 				    <div class="square_ratio"></div>
 				    <div id="map_canvas" class="square_div">
 				    </div>
 				</div>
+				<p>
+					<h3>But, <a href="">how has this been generated?</a></h3>
+				</p>	
 			</div>
-			<div class="span6">
-				<h1>Adrian&#8217;s Day in Vancouver</h1>
+			<div class="span7">
+				<h2>Your Personal Day in Vancouver</h2>
+				{% for each in itinerary %}
+					{% if each.sight %}
+					<div class="row">
+						<div class="span2">
+							<img src="" style="float:left;margin-top:20px;background:silver;width:100%;height:170px;" />
+						</div>
+						<div class="span5">
+							<h3>{{each.time}} min at {{each.title}}</h3>
+							<p>Longam esse per hoc quod distrahitur lector pagina continentur quaerentes readable at arcu. Punctum of usura Lorem Ipsum est, quod habet, magis-vel-minus normalis distributio litteris, ut opponitur utitur hoc nomine Content hic, contentus, hic ', faciens illud vultus amo readable English.</p>
+						</div>	
+					</div>	
+					{% else %}
+					<div class="row">
+						<div class="span2">
+						</div>	
+						<div class="span5">
+							<h3>{{each.time}} min walking</h3>
+						</div>
+					</div>	
+					{% endif %}
+					{% endfor %}
+				</div>
 			</div>
 		</div>				
 	</div>

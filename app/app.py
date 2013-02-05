@@ -11,7 +11,11 @@ def hello_world():
 
 @app.route('/vancouver')
 def vancouver():
-    return render_template('map.html')
+    return render_template('map.html', itinerary=[
+        {'title':'A','time':25,'sight':True},
+        {'title':'B','time':15},
+        {'title':'C','time':30,'sight':True},
+    ])
 
 @app.route('/vancouver/paths')
 def vancouver_paths():
