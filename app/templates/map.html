@@ -75,12 +75,11 @@
 				<hr>
 				{% for each in itinerary %}
 				{% if each.name %}
-					<div style="min-height:140px">
-							<img src="" style="float:left;margin:2px 12px 24px 0px;background:silver;width:120px;height:120px;" />
+							<img src="" style="float:left;margin:2px 12px 24px 0px;background:silver;width:80px;height:80px;" />
 							<h4>{{each.name}} <span style='font-weight:normal;color:silver'>&mdash; {{each.time}} min</span></h4>
-							<p>Longam esse per hoc quod distrahitur lector pagina continentur quaerentes readable at arcu. Punctum of usura Lorem Ipsum est, quod habet, magis-vel-minus normalis distributio litteris, ut opponitur utitur hoc nomine Content hic, contentus, hic ', faciens illud vultus amo readable English.<br></p>
-					</div>		
-				{% elif False %}
+							<p>{{each.description}}&hellip; (<a href="{{each.url}}">read more on Lonley Planet)</a></p>
+				{% else %}
+					<p style="clear:both">Walk about {{each.time}} min to &hellip;</p>
 				{% endif %}
 				{% endfor %}
 				</div>
