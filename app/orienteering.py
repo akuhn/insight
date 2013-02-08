@@ -81,7 +81,7 @@ class Walk(object):
     def time_at_sights(self):
         return sum([each['time'] for each in self.data if 'name' in each])
     def time_between_sights(self):
-        return math.sqrt(sum([each['time']**2 for each in self.data if not 'name' in each]))
+        return sum([each['time'] for each in self.data if not 'name' in each])
     def example(self):
         w = Walk()
         w << 'Waterfront Station'
@@ -130,9 +130,14 @@ def best_random_walk(G,time):
     
 # print best_random_walk(read_graph(),4*60*60).data
     
-def itinerary():
+def itinerary(time):
+    seed_0 = random.randint(0,999999)
+    seed = 60501
+    random.seed(seed)
     G = read_graph()
-    walk = best_random_walk(G,6*60*60)
+    walk = best_random_walk(G,time)
+    random.seed(seed_0)
+    
     sights = {}
     db = pymongo.MongoClient()['4h']
     for each in db.sights.find({'name':{'$in':walk.path}}):
@@ -152,4 +157,8 @@ def itinerary():
                 'url':s['url'],
                 'photo_url':random.sample(list(photos),1)[0]['url_s']
             })
-    return walk.data
+    json = {
+        'seed':seed,
+        'walk':walk.data
+    }
+    return json

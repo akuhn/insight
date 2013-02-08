@@ -2,6 +2,7 @@ from flask import Flask
 from flask import jsonify
 from flask import render_template
 from pymongo import MongoClient
+import random
 import orienteering
 import json
 
@@ -12,11 +13,13 @@ def hello_world():
     return render_template('index.html')
 
 @app.route('/vancouver')
-def vancouver():
-    data = orienteering.itinerary() 
-    print data
+def vancouver(): 
+    time = 6 * 60 * 60 # hours
+    n = random.randint(0,999999)
+    json = orienteering.itinerary(time) 
     return render_template('map.html', 
-        itinerary=data)
+        itinerary=json['walk'],
+        seed=json['seed'])
 
 if __name__ == '__main__':
     app.debug=True
