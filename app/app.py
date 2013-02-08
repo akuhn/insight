@@ -3,6 +3,7 @@ from flask import jsonify
 from flask import render_template
 from pymongo import MongoClient
 import orienteering
+import json
 
 app = Flask(__name__)
 
@@ -12,23 +13,10 @@ def hello_world():
 
 @app.route('/vancouver')
 def vancouver():
-    itinerary = orienteering.itinerary() 
-    return render_template('map.html', itinerary=itinerary)
-
-@app.route('/vancouver/paths')
-def vancouver_paths():
-    mongo = MongoClient()
-    paths = mongo['4h'].paths.find()
-    data = [[[each['latitude'],each['longitude']] for each in path['path']] for path in paths]
-    return jsonify({'city':'vancouver','paths':data})
-
-@app.route('/vancouver/sights')
-def vancouver_sights():
-    mongo = MongoClient()
-    sights = mongo['4h'].poi.find(fields={'_id':False})
-    data = [each for each in sights]
-    return jsonify({'city':'vancouver','sights':data})
-
+    data = orienteering.itinerary() 
+    print data
+    return render_template('map.html', 
+        itinerary=data)
 
 if __name__ == '__main__':
     app.debug=True

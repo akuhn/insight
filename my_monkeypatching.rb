@@ -33,6 +33,22 @@ module Enumerable
   def sample
     shuffle.first
   end
+  def average
+    inject(&:+) / size
+  end
+  def percentile(f)
+    return nil if empty?
+    sorted = self.sort
+    n = f.to_f * (self.size - 1)
+    a,b = n.floor,n.ceil
+    return sorted[a] if a == b
+    (b-n) * sorted[a] + (n-a) * sorted[b]
+  end
+  def hash_by
+    h = Hash.new(0)
+    each{|each|h[yield(each)]=each}
+    return h
+  end
 end
 
 class Array

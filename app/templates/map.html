@@ -87,9 +87,9 @@
 		</div>				
 	</div>
 
-	<script src="static/bootstrap/js/bootstrap.js"></script>
-  <script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+  <script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+	<script src="static/bootstrap/js/bootstrap.js"></script>
 	<script>
 		function initialize() {
 			var mapOptions = {
@@ -102,33 +102,26 @@
 			};
 			var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 		
-			return
+			var path = [{% for each in itinerary %}{% if each.name %}
+				[{{ each.latitude }},{{ each.longitude }}],
+			{% endif %}{% endfor %}]
 		
-			$.getJSON('/vancouver/paths', function(data) { 
-				data.paths.forEach(function(path) {
-					var polyline = []
-					path.forEach(function(each) {
-						polyline.push(new google.maps.LatLng(each[0],each[1]))
-					})
-			        new google.maps.Polyline({
-			          path: polyline,
-			          strokeColor: '#FF0000',
-			          strokeOpacity: 0.5,
-			          strokeWeight: 1
-			        }).setMap(map);
-				})
+			var polyline = []
+			path.forEach(function(each) {
+				var loc = new google.maps.LatLng(each[0],each[1])
+				polyline.push(loc)
+        var marker = new google.maps.Marker({
+            position: loc,
+            map: map,
+            title: each.name
+        })
 			})
-		
-			$.getJSON('/vancouver/sights', function(data) {
-				data.sights.forEach(function(each) {
-					if (each.category != 'sights') return
-			        var marker = new google.maps.Marker({
-			            position: new google.maps.LatLng(each.latitude,each.longitude),
-			            map: map,
-			            title: each.name
-			        })
-				})
-			})
+      new google.maps.Polyline({
+        path: polyline,
+        strokeColor: '#0000FF',
+        strokeOpacity: 1,
+        strokeWeight: 4
+      }).setMap(map);
 		
 		}
 	</script>
