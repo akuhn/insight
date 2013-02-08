@@ -19,39 +19,6 @@ def tweetify(str):
 
 # (end)
 
-class Walk(object):
-    def __init__(self,graph):
-        self.path = []
-        self.data = []
-        self.G = graph
-    def __lshift__(self,node):
-        if len(self.path) > 0: 
-            self.data[-1]['transition'] += self.G[self.path[-1]][node]['time']
-        if not node in self.path:
-            self.data.append({
-                'name':node,
-                'time':self.G.node[node]['time'],
-                'transition':0
-            })
-        self.path.append(node)
-    def time(self):
-        if len(self.path) == 0: return 0.0
-        time = 0
-        time += sum([each['time'] for each in self.data])
-        time += sum([each['transition'] for each in self.data])
-        time -= self.data[-1]['transition'] # but last
-        return time
-    def example():
-        w = Walk(read_graph())
-        w << 'Waterfront Station'
-        w << 'Steam Clock'
-        w << 'Vancouver Art Gallery'
-        w << 'Steam Clock'
-        w << 'Waterfront Station'
-        print w.path
-        print w.data
-        print w.time()
-
 def read_graph():
     db = pymongo.MongoClient()['4h']
     g = db.graph.find_one()
@@ -74,9 +41,64 @@ def read_graph():
         else:
             G.remove_edge(a,b)          
     return G
-    
+
+
+class Walk(object):
+    def __init__(self):
+        self.path = []
+        self.dedup = None
+        self.data = None
+    def __lshift__(self,node):
+        self.path.append(node)
+    def deduplicate(self):
+        self.dedup = []
+        for each in self.path:
+            if not each in self.dedup:
+                self.dedup.append(each)
+            else:    
+                self.dedup.append(None)
+        self.dedup[-1] = self.path[-1]
+    def fetch_time_data(self,G):
+        self.data = []
+        prev = None
+        for each,uniq in zip(self.path,self.dedup):
+            if prev:
+                self.data[-1]['time'] += G.edge[prev][each]['time']
+            if uniq: 
+                self.data.append({
+                    'name':each,
+                    'time':G.node[each]['time']
+                })
+                self.data.append({
+                    'time':0
+                })
+            prev = each
+        self.data.pop()
+    def time(self):
+        return sum([each['time'] for each in self.data])
+    def time_at_sights(self):
+        return sum([each['time'] for each in self.data if 'name' in each])
+    def time_between_sights(self):
+        return math.sqrt(sum([each['time']**2 for each in self.data if not 'name' in each]))
+    def example(self):
+        w = Walk()
+        w << 'Waterfront Station'
+        w << 'Steam Clock'
+        w << 'Vancouver Art Gallery'
+        w << 'Steam Clock'
+        w << 'Waterfront Station'
+        print w.path
+        w.deduplicate()
+        print w.path
+        w.fetch_time_data(read_graph())
+        print w.data
+        print w.time()
+        print w.time_at_sights()
+        print w.time_between_sights()
+  
 def random_walk(G,a,time):
-    walk = [a]
+    walk = Walk()
+    walk << a
     while True:
         neighbors = G.neighbors(a)
         if a in neighbors: neighbors.remove(a)
@@ -86,59 +108,44 @@ def random_walk(G,a,time):
         time -= G.node[a]['time']
         time -= G.edge[a][b]['time']
         if abs(time) > abs(time_0): break
-        walk.append(b)
+        walk << b
         a = b
     return walk
 
-def prize(G,path):
-    d = {}
-    for each in path: 
-        d[each] = G.node[each]['time']
-    return sum(d.values())
-
-def budget(G,path):
-    x = 0
-    for each in set(path):
-        x += G.node[each]['time']
-    for a,b in pairwise(path):
-        x += G.edge[a][b]['time']
-    return x
-    
 def best_random_walk(G,time):
     best,hiscore = None,None
     for n in range(0,20):
-        a = random.sample(G.nodes(),1)[0]
+        # a = random.sample(G.nodes(),1)[0]
+        a = 'Waterfront Station'
         walk = random_walk(read_graph(),a,time)
-        duration = budget(G,walk)
-        score = prize(G,walk) - abs(time - duration)**2
+        walk.deduplicate()
+        walk.fetch_time_data(G)
+        duration = walk.time()
+        score = walk.time_at_sights() - walk.time_between_sights() - abs(time - duration)**2
         if not best or score > hiscore:
             best,hiscore = walk,score
     return best
     
-print best_random_walk(read_graph(),4*60*60)
+# print best_random_walk(read_graph(),4*60*60).data
     
 def itinerary():
     G = read_graph()
-    path = best_random_walk(G,4*60*60)
-    path.append(None)
+    walk = best_random_walk(G,6*60*60)
     sights = {}
     db = pymongo.MongoClient()['4h']
-    for each in db.sights.find({'name':{'$in':path}}):
+    for each in db.sights.find({'name':{'$in':walk.path}}):
         sights[each['name']] = each
 
-    data = []
     t = lambda t: int(math.ceil(t/60/5)) * 5
 
-    for a,b in pairwise(path):
-        s = sights[a]
-        data.append({
-            'name':a,
-            'time':t(G.node[a]['time']),
-            'latitude':s['latitude'],
-            'longitude':s['longitude'],
-            'description':tweetify(s['description']),
-            'url':s['url']
-        })
-        if b: data.append({'time':t(G[a][b]['time'])})
-
-    return data
+    for each in walk.data:
+        each['time'] = t(each['time'])
+        if 'name' in each:
+            s = sights[each['name']]
+            each.update({
+                'latitude':s['latitude'],
+                'longitude':s['longitude'],
+                'description':tweetify(s['description']),
+                'url':s['url']
+            })
+    return walk.data
