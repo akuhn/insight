@@ -12,7 +12,7 @@ def pairwise(l):
     return zip(l[:-1], l[1:])
 
 def k(key):
-    lambda each: each[key]
+    return lambda d: d[key]
 
 def tweetify(str):
     return re.match(re.compile('(.{,140})\s'),str).group(1)
@@ -51,12 +51,14 @@ class Walk(object):
     def __lshift__(self,node):
         self.path.append(node)
     def deduplicate(self):
+        last = self.path[-1]
         self.dedup = []
         for each in self.path:
-            if not each in self.dedup:
-                self.dedup.append(each)
-            else:    
+            if each == last or each in self.dedup:
                 self.dedup.append(None)
+            else:    
+                self.dedup.append(each)
+        self.dedup[0] = self.path[0]
         self.dedup[-1] = self.path[-1]
     def fetch_time_data(self,G):
         self.data = []
@@ -142,10 +144,12 @@ def itinerary():
         each['time'] = t(each['time'])
         if 'name' in each:
             s = sights[each['name']]
+            photos = db['flickr'].find({'geotag':{'$near':[s['longitude'],s['latitude']]}})
             each.update({
                 'latitude':s['latitude'],
                 'longitude':s['longitude'],
                 'description':tweetify(s['description']),
-                'url':s['url']
+                'url':s['url'],
+                'photo_url':random.sample(list(photos),1)[0]['url_s']
             })
     return walk.data
