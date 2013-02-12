@@ -128,15 +128,14 @@ def best_random_walk(G,time):
             best,hiscore = walk,score
     return best
     
-# print best_random_walk(read_graph(),4*60*60).data
-    
 def itinerary(time):
     seed_0 = random.randint(0,999999)
     seed = 60501
     random.seed(seed)
     G = read_graph()
     walk = best_random_walk(G,time)
-    random.seed(seed_0)
+    random.seed(659220)
+    seed = seed_0
     
     sights = {}
     db = pymongo.MongoClient()['4h']
@@ -144,7 +143,7 @@ def itinerary(time):
         sights[each['name']] = each
 
     t = lambda t: int(math.ceil(t/60/5)) * 5
-
+    n = 0
     for each in walk.data:
         each['time'] = t(each['time'])
         if 'name' in each:
@@ -155,10 +154,13 @@ def itinerary(time):
                 'longitude':s['longitude'],
                 'description':tweetify(s['description']),
                 'url':s['url'],
-                'photo_url':random.sample(list(photos),1)[0]['url_s']
+                'photo_url':random.sample(list(photos),1)[0]['url_s'],
+                'cssid':'sight'+str(n),
             })
+            n += 1
     json = {
         'seed':seed,
-        'walk':walk.data
+        'walk':walk.data,
+        'time':walk.time() / 3600.0
     }
     return json

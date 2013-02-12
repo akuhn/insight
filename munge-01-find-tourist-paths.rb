@@ -17,7 +17,7 @@ Vancouver = {
 }
 
 Photos = DB['flickr'] # read
-Paths = DB[nil] # write!
+Paths = DB['new_paths'] # write!
 
 puts "Found #{Photos.count} photos..."
 
@@ -30,7 +30,11 @@ class Hash
   end
 end
 
-Photos.distinct(:owner,Vancouver).each do |user|
+puts Photos.distinct(:owner,Vancouver).size
+
+X
+
+each do |user|
   query = { :owner => user }.merge(Vancouver)
   projection = [:latitude,:longitude,:tags,:description,:datetaken,:views,:url_s]
   photos = Photos.find(query,:fields=>projection).to_a

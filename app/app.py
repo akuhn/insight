@@ -22,6 +22,4 @@ def vancouver():
         seed=json['seed'])
 
 if __name__ == '__main__':
-    app.debug=True
-    app.run()
-    #app.run(host='192.168.1.17',port=1234)
+    app.run(host='0.0.0.0',port=8080)
