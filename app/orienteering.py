@@ -1,5 +1,6 @@
 import networkx as nx
 import numpy as np
+from time import time as unix_epoch
 import pymongo 
 import math
 import itertools
@@ -19,8 +20,11 @@ def tweetify(str):
 
 # (end)
 
+def mongo_db():
+    return pymongo.MongoClient()['insight']
+
 def read_graph():
-    db = pymongo.MongoClient()['4h']
+    db = mongo_db()
     g = db.graph.find_one()
     G = nx.Graph()
     for each,values in g['nodes'].items():
@@ -116,7 +120,7 @@ def random_walk(G,a,time):
 
 def best_random_walk(G,time):
     best,hiscore = None,None
-    for n in range(0,20):
+    for n in range(0,50):
         # a = random.sample(G.nodes(),1)[0]
         a = 'Waterfront Station'
         walk = random_walk(read_graph(),a,time)
@@ -129,16 +133,13 @@ def best_random_walk(G,time):
     return best
     
 def itinerary(time):
-    seed_0 = random.randint(0,999999)
-    seed = 60501
+    seed = int(unix_epoch())
     random.seed(seed)
     G = read_graph()
     walk = best_random_walk(G,time)
-    random.seed(659220)
-    seed = seed_0
     
     sights = {}
-    db = pymongo.MongoClient()['4h']
+    db = mongo_db()
     for each in db.sights.find({'name':{'$in':walk.path}}):
         sights[each['name']] = each
 
@@ -154,7 +155,7 @@ def itinerary(time):
                 'longitude':s['longitude'],
                 'description':tweetify(s['description']),
                 'url':s['url'],
-                'photo_url':random.sample(list(photos),1)[0]['url_s'],
+                'photo_url': '', # random.sample(list(photos),1)[0]['url_s'],
                 'cssid':'sight'+str(n),
             })
             n += 1
@@ -164,3 +165,5 @@ def itinerary(time):
         'time':walk.time() / 3600.0
     }
     return json
+
+print itinerary(6*60*60)

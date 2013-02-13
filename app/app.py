@@ -22,7 +22,6 @@ def login(token):
 @app.route('/vancouver')
 def vancouver(): 
     time = 6 * 60 * 60 # hours
-    n = random.randint(0,999999)
     json = orienteering.itinerary(time) 
     return render_template('map.html', 
         itinerary=json['walk'],
