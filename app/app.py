@@ -1,16 +1,23 @@
 from flask import Flask
-from flask import jsonify
-from flask import render_template
+from flask import jsonify,render_template,request,session,redirect
 from pymongo import MongoClient
 import random
-import orienteering
 import json
 
+import orienteering
+
 app = Flask(__name__)
+app.secret_key = '???'
 
 @app.route('/')
 def home():
     return render_template('index.html')
+
+@app.route('/login/<token>')
+def login(token):
+    print token
+    session['token'] = token
+    return redirect('/vancouver')
 
 @app.route('/vancouver')
 def vancouver(): 
@@ -25,5 +32,15 @@ def vancouver():
 def hello_world():
     return 'Hello, worlds!'
 
+@app.route('/fb')
+def facebook():
+    return render_template('fb.html')
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',port=8080)
+    app.debug = True
+    app.run(host='127.0.0.1',port=8080)

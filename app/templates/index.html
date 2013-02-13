@@ -5,8 +5,8 @@
 		body {
 			background: url(static/img/fbcover-vancouver.jpg);
 			background-size: cover;
-	        padding-top: 60px;
-	        padding-bottom: 40px;
+	    padding-top: 60px;
+	    padding-bottom: 40px;
 		}
 		.navbar-inverse .navbar-inner {
 			background-color: #08111D;
@@ -14,28 +14,28 @@
 		.container, .navbar-fixed-top .container {
 			width: 720px;
 		}
-        .jumbotron {
-          margin: 20px 0;
-          text-align: center;
-		  background: -webkit-radial-gradient(circle, 
-			  rgba(104, 165, 203, 0.7), 
-			  rgba(104, 165, 203, 0.5));
-		  border-radius: 12px;
-		  color: white;
-		  text-shadow: 0px 2px 2px #68A5CB;
-        }
-        .jumbotron h1 {
-          font-size: 72px;
-          line-height: 1;
-        }
+		.jumbotron {
+			margin: 20px 0;
+			text-align: center;
+			background: -webkit-radial-gradient(circle, 
+			rgba(104, 165, 203, 0.7), 
+			rgba(104, 165, 203, 0.5));
+			border-radius: 12px;
+			color: white;
+			text-shadow: 0px 2px 2px #68A5CB;
+		}
+		.jumbotron h1 {
+			font-size: 72px;
+			line-height: 1;
+		}
 		.jumbotron p.lead {
 			margin-top: 24px;
 			margin-bottom: 72px;
 		}
-        .jumbotron .btn {
-          font-size: 21px;
-          padding: 14px 24px;
-        }
+    .jumbotron .btn {
+      font-size: 21px;
+      padding: 14px 24px;
+    }
 		
 		/* #B4DDEF, #9FD1E8, #68A5CB, #08111D */
 		/* .., rgba(159, 209, 232, 0.9), rgba(104, 165, 203, 0.5),.. */
@@ -43,6 +43,36 @@
 	</style>
 </head>
 <body>
+	<div id="fb-root"></div>
+	<script>
+	  // Additional JS functions here
+	  window.fbAsyncInit = function() {
+	    FB.init({
+	      appId: 582750318420514,
+	      status: true,
+	      cookie: true
+	    });
+	  };
+				
+		function connect() {
+	    FB.login(function(response) {
+        if (response.authResponse) {
+					document.location = '/login/' + response.authResponse.accessToken
+        } else {
+					alert('Login failed :(')
+        }
+		  }, {scope:'user_likes'});
+		}
+				
+	  // Load the SDK Asynchronously
+	  (function(d){
+	     var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+	     if (d.getElementById(id)) {return;}
+	     js = d.createElement('script'); js.id = id; js.async = true;
+	     js.src = "http://connect.facebook.net/en_US/all.js";
+	     ref.parentNode.insertBefore(js, ref);
+	   }(document));
+	</script>
 	
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
@@ -80,7 +110,7 @@
 		<div class="jumbotron hero-unit">
 			<h1>One Day in Town?</h1>
 			<p class="lead">We got you covered. Get your personalized day now!</p>
-			<a class="btn btn-large btn-success" href="/vancouver">Connect with Facebook</a>
+			<button class="btn btn-large btn-success" onclick="connect()">Connect with Facebook</button>
 		</div>
     </div>
 
