@@ -6,19 +6,8 @@ import math
 import itertools
 import re
 import random
-
-# Monkey patching (fold)
-
-def pairwise(l):
-    return zip(l[:-1], l[1:])
-
-def k(key):
-    return lambda d: d[key]
-
-def tweetify(str):
-    return re.match(re.compile('(.{,140})\s'),str).group(1)
-
-# (end)
+#
+from my_util import *
 
 def mongo_db():
     return pymongo.MongoClient()['insight']
