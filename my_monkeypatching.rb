@@ -9,6 +9,12 @@ class Hash
   end
 end
 
+class String
+  def exist?
+    File.exist?(self)
+  end
+end
+  
 
 module Enumerable
   def fmap#{|each|}
