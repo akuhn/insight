@@ -80,7 +80,8 @@
 				{% for each in itinerary %}
 				{% if each.name %}
 				<div>
-							<img src="{{each.photo_url}}" style="float:left;margin:2px 12px 24px 0px;background:silver;width:80px;height:80px;" />
+							<img src="{{each.photo_url}}" style="float:right;margin:2px 12px 24px 0px;background:silver;width:75px;height:75px;" />
+							<img src="{{each.marker}}" style="float:left;margin:4px 12px 50px 0;">
 							<h4 id="{{ each.cssid }}">{{each.name}} <small>&mdash; most people spent {{each.time}} min here</small></h4>
 							<p>{{each.description}}&hellip; (<a href="{{each.url}}">read more on Lonely Planet)</a></p>
 							<br style="clear:both"/>
@@ -113,7 +114,7 @@
 			var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 		
 			var path = [{% for each in itinerary %}{% if each.name %}
-				[{{ each.latitude }},{{ each.longitude }},"{{ each.cssid }}"],
+				[{{ each.latitude }},{{ each.longitude }},"{{ each.cssid }}","{{ each.marker }}"],
 			{% endif %}{% endfor %}]
 
 			jQuery.fn.flash = function( )
@@ -129,7 +130,14 @@
         var marker = new google.maps.Marker({
             position: loc,
             map: map,
-            title: each[2]
+            title: each[2],
+						icon: {
+							  url: each[3],
+						},
+						shadow: {
+							  url: 'http://maps.google.com/mapfiles/shadow50.png',
+								anchor: new google.maps.Point(9, 35),
+						}
         })
 		    google.maps.event.addListener(marker, 'click', function(){
 					var offset = $('#'+each[2]).offset();

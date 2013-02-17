@@ -146,8 +146,11 @@ def itinerary(time):
                 'url':s['url'],
                 'photo_url': '', # random.sample(list(photos),1)[0]['url_s'],
                 'cssid':'sight'+str(n),
+                'marker':'http://maps.google.com/mapfiles/marker{}.png'.format(chr(ord('A')+n))
             })
             n += 1
+    walk.data[0]['marker'] = 'http://maps.google.com/mapfiles/marker_yellowA.png'
+    walk.data[-1]['marker'] = 'http://maps.google.com/mapfiles/marker_yellowZ.png'
     json = {
         'seed':seed,
         'walk':walk.data,
