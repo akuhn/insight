@@ -1,7 +1,7 @@
 import pymongo
 import json
 #
-from util import each
+from my_util import each
 
 db = pymongo.MongoClient().insight
 config = json.load(open('token-facebook.json'))
