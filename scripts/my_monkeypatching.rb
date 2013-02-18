@@ -50,7 +50,7 @@ module Enumerable
     return sorted[a] if a == b
     (b-n) * sorted[a] + (n-a) * sorted[b]
   end
-  def hash_by
+  def as_hash
     h = Hash.new(0)
     each{|each|h[yield(each)]=each}
     return h
@@ -61,6 +61,10 @@ class Array
   def but_last
     self[0...-1]
   end
+end
+
+def parse_time(str)
+  Time.utc(*str.scan(/\d+/).collect(&:to_i))
 end
 
 # (end)
