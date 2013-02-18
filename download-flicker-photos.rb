@@ -55,9 +55,9 @@ Vancouver = { :lat => 49.25, :lon => -123.1, :radius => 15, :name => 'vancouver'
 Rome = { :lat => 41.9, :lon => 12.5, :radius => 10, :name => 'rome' }
 Paris = { :lat => 48.8742, :lon => 2.3470, :radius => 10, :name => 'paris' }
 Sanfran = { :lat => 37.775, :lon => -122.4183, :radius => 15, :name => 'sanfran' }
+Beijing = { :lat => 39.9100, :lon => 116.4000, :radius => 30, :name => 'beijing' }
 
-
-city = Sanfran
+city = Beijing
 
 # download day by day (to avoid search limit)
 a = Date.civil(2013,1,1)
