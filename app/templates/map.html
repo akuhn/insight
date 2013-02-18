@@ -22,6 +22,17 @@
 		    right: 0;
 				background: silver;
 		}
+		.sight {
+			position: relative;
+		}
+		.sight .ex {
+			position: absolute;
+			top: 0px;
+			right: 100px;
+			color: red;
+			cursor: pointer;
+			display: none;
+		}
 	</style>
 </head>
 <body onload="initialize()">
@@ -79,12 +90,13 @@
 				<hr>
 				{% for each in itinerary %}
 				{% if each.name %}
-				<div>
+				<div id="{{ each.cssid }}" class="sight">
 							<img src="{{each.photo_url}}" style="float:right;margin:2px 12px 24px 0px;background:silver;width:75px;height:75px;" />
 							<img src="{{each.marker}}" style="float:left;margin:4px 12px 50px 0;">
-							<h4 id="{{ each.cssid }}">{{each.name}} <small>&mdash; most people spent {{each.time}} min here</small></h4>
+							<h4>{{each.name}} <small>&mdash; most people spent {{each.time}} min here</small></h4>
 							<p>{{each.description}}&hellip; (<a href="{{each.url}}">read more on Lonely Planet)</a></p>
 							<br style="clear:both"/>
+							<img class="ex" src="static/close.png">
 				</div>			
 				{% else %}
 					<p style="clear:both">Walk about {{each.time}} min to &hellip;</p>
@@ -130,7 +142,6 @@
         var marker = new google.maps.Marker({
             position: loc,
             map: map,
-            title: each[2],
 						icon: {
 							  url: each[3],
 						},
@@ -139,6 +150,7 @@
 								anchor: new google.maps.Point(9, 35),
 						}
         })
+				$('#'+each[2]).data('marker',marker)
 		    google.maps.event.addListener(marker, 'click', function(){
 					var offset = $('#'+each[2]).offset();
 					$('html, body').animate({
@@ -186,10 +198,19 @@
 				prev = curr;
 			})
 			
-			console.log(bounds)
-			
-			/* map.fitBounds(bounds); */
-		
 		}
+	</script>
+	<script>
+		$(document).ready(function(){ 
+			$(".sight").hover(
+				function() { $(this).find(".ex").show() },
+				function() { $(this).find(".ex").hide() }
+			)
+			$(".sight .ex").click(function() { 
+					console.log($(this).parent().attr('id')) 
+					$(this).parent().data('marker').setMap(null)
+					$(this).parent().remove()
+			})
+		})
 	</script>
 </body>		
