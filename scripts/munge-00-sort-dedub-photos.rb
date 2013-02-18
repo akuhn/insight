@@ -9,7 +9,7 @@ require 'my_monkeypatching'
 #  - unpacking description
 #  - parsing datetaken as utime
 #  - sorting by datetaken
-#  - removing unused fields
+#  - delete keys we're not looking for
 
 City = 'sanfran'
 
@@ -19,14 +19,17 @@ def munge_photos(photos)
   place_id tags title url_q url_sq views woeid}
   reply = []
   photos.each do |photo|
+    # We need dates including time of the day
     next unless photo.datetakengranularity == "0"
+    # We need street level accuracy
     next unless photo.accuracy == "16"
+    # Unpack description
     photo['description'] = photo.description['_content']
+    # These are not the keys you're looking for 
     (photo.keys-keep).each{|key|photo.delete(key)}
+    # Parse datetaken into utime, gloss over errors
     begin
-      str = photo.datetaken
-      time = str.scan(/\d+/).collect(&:to_i)
-      photo['datetaken'] = Time.utc(*time).to_i
+      photo['datetaken'] = parse_time(photo.datetaken).to_i
     rescue
       p photo.datetaken
     end
@@ -36,12 +39,16 @@ def munge_photos(photos)
 end
 
 def sorted_photos(date)
+  # Load three days to account for flickr API glitches
   ((date-1)..(date+1)).collect do |data|
     "downloads/#{City}-#{date}.json"
+  # Gloss over missing files
   end.select do |fname|
     fname.exist?
+  # Read files 
   end.collect do |fname|
     JSON.load(File.read(fname))
+  # Select given day only  
   end.flatten.select do |photo|
     photo.datetaken[0...10] == date.to_s
   end.sort_by(&:datetaken)
