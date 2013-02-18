@@ -16,28 +16,35 @@ def download(url):
     try:
         request = urllib2.Request(url)
         request.get_method = lambda: 'HEAD'
-        mime = urllib2.urlopen(request).info().gettype() 
+        mime = urllib2.urlopen(request,'',3).info().gettype() 
         if not mime == 'text/html': return None
-        return urllib2.urlopen(url).read()
+        return urllib2.urlopen(url,'',3).read()
     except urllib2.HTTPError as error:
         print "HTML {}: {}".format(error.code,url)
         return None    
 
 def extend_token(fb_token):
     fb = facebook.GraphAPI(fb_token)
-    fb.extend_access_token(config['key'],config['secret'])
+    json = fb.extend_access_token(config['key'],config['secret'])
+    extended_token = json['access_token']
     me = fb.get_object('me')
     db.facebook.update(
         {'id':me['id']}, # query
-        {'id':me['id'],'me':me,'token':fb.access_token}, #update
+        {'id':me['id'],'me':me,'token':extended_token}, #update
         upsert=True) 
     return fb.access_token
 
+
+def me(fb_token):
+    fb = facebook.GraphAPI(fb_token)
+    return fb.get_object('me')
+    
 
 def count_words_in_url(url):
     """
     Counts words in an html document.
     """
+    if "nytimes" in url: url += '?_r=6' # fix redirect hell 
     bag = collections.Counter()
     re = regex.compile(r'[a-z]\w+')
     for word in regex.findall(re,url.lower()): bag[str(word)] += 10
@@ -64,5 +71,5 @@ def count_words_in_url_likes(fb_token):
  
  
 if __name__ == "__main__":
-    # print count_words_in_url('http://twitter.com/akuhn')
-    print count_words_in_url_likes('AAAISAiG44iIBABMRolVWAgXHF2k3u3iilSJXvXHb3i0B9jyZBpZCZCi9fHcKAEEclNE8x3jE1Epl0HTvZB1UuC3ZBKw2OJokZD')
+    print count_words_in_url('http://twitter.com/akuhn')
+    print count_words_in_url_likes(token)

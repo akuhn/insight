@@ -3,8 +3,8 @@ import json
 #
 from my_util import each
 
-db = pymongo.MongoClient().insight
 config = json.load(open('token-facebook.json'))
+db = pymongo.MongoClient()[config['database']]
 
 if __name__ == "__main__":
     print "Database:"
