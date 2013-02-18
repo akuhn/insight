@@ -158,4 +158,5 @@ def itinerary(time):
     }
     return json
 
-print itinerary(6*60*60)
+if __name__ == "__main__":
+    print itinerary(6*60*60)
