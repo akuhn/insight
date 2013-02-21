@@ -79,7 +79,7 @@
 				    </div>
 					</div>
 					<p>
-						<bigger><b>Total time:</b> 6 hours (including lunch break)</bigger>
+						<bigger><b>Total time:</b> 6 hours (including lunch/coffee breaks)</bigger>
 						<!-- ><h3>But, <a href="">how has this been generated?</a></h3> -->
 					</p>	
 				</div>
@@ -168,7 +168,14 @@
 					html += "</div>"
 				}
 				else {
-					html += "<p style='clear:both'>Walk about "+each.time+" min to &hellip;</p>"
+					html += "<p style='clear:both'>Walk about "+each.time+" min "
+					if (each.time > 60) {
+						html += ' (including lunch break)'
+					} 
+					else if (each.time > 40) {
+						html += ' (including coffee break)'
+					} 
+					html += " to &hellip;</p>"
 				}
 			})
 			$('#throbber').replaceWith(html)
