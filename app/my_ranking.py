@@ -95,9 +95,11 @@ def top_ten_sights_for(token):
     index,lsi,tfidf,dictionary,documents = create_index() 
     name = fb.me(token)['name']
     bag = fb.count_words_in_url_likes(token)
+    # print bag
     v = bag2bow(dictionary,bag)
     sims = index[lsi[tfidf[v]]]
     ranking = sorted(enumerate(sims), key=each[1], reverse=True)
+    # print ranking
     top10 = map(each[0], itertools.islice(ranking,10))
     return [documents[rank]['name'] for rank in top10]
 
@@ -116,7 +118,7 @@ def top_ten_sights_for_me():
 
 if __name__ == "__main__":
     tokens = json.load(open('token-facebook-users.json'))
-    token = tokens['george']
+    token = tokens['thereza']
     top_ten = top_ten_sights_for(token)
     print top_ten
     import my_routing

@@ -30,7 +30,7 @@ def read_graph():
     for a,b in G.edges():
         values = G[a][b]['time']
         if len(values) > 1:
-            G[a][b]['time'] = np.percentile(G[a][b]['time'],25) 
+            G[a][b]['time'] = np.percentile(G[a][b]['time'],50) 
         else:
             G.remove_edge(a,b)          
     return G
@@ -68,7 +68,7 @@ class Walk(object):
         self.json = []
     def __lshift__(self,node):
         if self.prev: 
-            self.accrued_time += self.g.edge[self.prev][node]['time']
+            self.accrued_time = 0.5 * self.accrued_time + self.g.edge[self.prev][node]['time']
         if not node in self.path: # deduplicate on the fly!
             time = self.g.node[node]['time']
             if self.prev:
@@ -82,14 +82,22 @@ class Walk(object):
             self.time += time + self.accrued_time
             self.accrued_time = 0
         self.prev = node
+    def time_at_sights(self):
+        values = [each['time'] for each in self.json if 'name' in each]
+        return sum(values)
+    def time_between_sights(self):
+        values = [each['time'] for each in self.json if not 'name' in each]
+        return sum([x**1.2 for x in values if x > 25])
+        
 
 
-def append_random_step(G,w):
+def append_random_step(G,w,top_ten):
     more = G.neighbors(w.prev)
     if w.prev in more: more.remove(w.prev)
     if len(more) == 0: return 
     n = random.sample(more,1)[0]
     w << n
+    if each in top_ten: top_ten.remove(each) 
 
 
 def find_route(G,top_ten,duration):
@@ -105,12 +113,22 @@ def find_route(G,top_ten,duration):
             if w.time > duration: return w
         # Then append some random steps
         for _ in range(2):
-            append_random_step(G,w)
+            append_random_step(G,w,top_ten)
             if w.time > duration: return w
     for _ in range(10):
-        append_random_step(G,w)
+        append_random_step(G,w,top_ten)
         if w.time > duration: return w
     return w
+
+
+def fitness(walk,duration):
+    return 0.25 * walk.time_at_sights() - walk.time_between_sights()  
+
+
+def find_best_route_of_many(G,top_ten,duration):
+    many = [find_route(G,list(top_ten),duration) for _ in range(20)]
+    best = max(many,key=lambda each: fitness(each,duration))
+    return best
 
 
 def serve_walk_to_website(walk,seed):
@@ -149,16 +167,13 @@ def itinerary(token,seed):
     from my_ranking import top_ten_sights_for
     top_ten = top_ten_sights_for(token)
     G = read_graph()
-    w = find_route(G,top_ten,6*HOURS)
+    w = find_best_route_of_many(G,top_ten,6*HOURS)
     return serve_walk_to_website(w,seed)
       
   
 if __name__ == "__main__":
-    G = read_graph()
-    top_ten = top_ten_sights_for('me')
-    w = find_route(G,top_ten,6*HOURS)
-    print w.path
-    print w.prev
-    print w.time/HOURS
+    w = itinerary('me',0)
+    print w['path']
+    print w['time']
     
 
