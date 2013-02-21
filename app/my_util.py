@@ -1,5 +1,6 @@
 import re
 
+HOURS = 60*60
 
 class Each(object):
     def __getitem__(self,key):

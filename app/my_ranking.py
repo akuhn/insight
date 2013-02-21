@@ -7,9 +7,8 @@ import pymongo
 import json
 import re as regex
 #
-sys.path.append("../app")
 from my_config import db,config
-from my_util import each
+from my_util import *
 import my_facebook as fb
 
 
@@ -104,5 +103,13 @@ def top_ten_sights_for(token):
 
 if __name__ == "__main__":
     tokens = json.load(open('token-facebook-users.json'))
-    token = tokens['adrian']
-    print top_ten_sights_for(token)    
+    token = tokens['george']
+    top_ten = top_ten_sights_for(token)
+    print top_ten
+    import my_routing
+    G = my_routing.read_graph()
+    w = my_routing.find_route(G,top_ten,6*HOURS)
+    print w.path
+    print w.prev
+    print w.time/HOURS
+    
