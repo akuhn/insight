@@ -30,9 +30,11 @@
 			top: 0px;
 			right: 100px;
 			color: red;
-			cursor: pointer;
 			display: none;
 		}
+		.sight .ex, .sight .marker {
+			cursor: pointer;
+	  }
 	</style>
 </head>
 <body onload="initialize()">
@@ -104,6 +106,13 @@
   <script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
 	<script src="static/bootstrap/js/bootstrap.js"></script>
 	<script>
+
+		jQuery.fn.flash = function() {
+	    var current = this.css('color')
+	    this.animate( { 'background-color': 'rgb(255,255,127)'}, 500 )
+	    this.animate( { 'background-color': 'white'}, 500 )
+		}
+
 	
 		function initializeMap() {
 			var mapOptions = {
@@ -160,7 +169,7 @@
 				if (each.name) {
 					html += "<div id=" + each.cssid + " class='sight'>"
 					html += "<img src='"+each.photo_url+"' style='float:right;margin:2px 12px 24px 0px;background:silver;width:75px;height:75px;' />"
-					html += "<img src=" + each.marker + " style='float:left;margin:4px 12px 50px 0;'>"
+					html += "<img class='marker' src=" + each.marker + " style='float:left;margin:4px 12px 50px 0;'>"
 					html += "<h4>" + each.name + "<small>&mdash; most people spent "+each.time+" min here</small></h4>"
 					html += "<p>"+each.description+"&hellip; (<a href='"+each.url+"'>read more on Lonely Planet)</a></p>"
 					html += "<br style='clear:both'/>"
@@ -187,6 +196,11 @@
 					console.log($(this).parent().attr('id')) 
 					$(this).parent().data('marker').setMap(null)
 					$(this).parent().remove()
+			})
+			$(".sight .marker").click(function() {
+					var marker = $(this).parent().data('marker')
+					marker.setAnimation(google.maps.Animation.BOUNCE)
+					setTimeout(function(){ marker.setAnimation(null) }, 1444)
 			})
 			var map = $('#map_canvas').data('map')
 			$(data.walk).each(function(n,each) {
