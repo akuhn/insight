@@ -43,53 +43,6 @@
 			});
 		})
 		
-		var directionsService = new google.maps.DirectionsService();
-	  var directionsDisplay = new google.maps.DirectionsRenderer();
-	  directionsDisplay.setMap(map);
-
-		var bounds = new google.maps.LatLngBounds();
-			
-		var prev = null
-		path.forEach(function(each) {
-			var curr = new google.maps.LatLng(each[0],each[1])
-		  if (prev) {
-				var polyline = new google.maps.Polyline({
-					path: [],
-					strokeColor: '#0000FF',
-					strokeWeight: 4
-				});
-				/*  */
-				var request = { 
-					origin: prev, 
-					destination: curr, 
-					travelMode: google.maps.DirectionsTravelMode.WALKING, 
-				};
-				directionsService.route(request, function(result, status) { 
-					if (status == google.maps.DirectionsStatus.OK) {
-						path = result.routes[0].overview_path;
-						
-						$(path).each(function(index, item) {
-							polyline.getPath().push(item);
-							bounds.extend(item);
-						})
-
-						polyline.setMap(map);
-					}
-				});
-		  }
-			prev = curr;
-		})
 			
 	}
 
-	$(document).ready(function(){ 
-		$(".sight").hover(
-			function() { $(this).find(".ex").show() },
-			function() { $(this).find(".ex").hide() }
-		)
-		$(".sight .ex").click(function() { 
-				console.log($(this).parent().attr('id')) 
-				$(this).parent().data('marker').setMap(null)
-				$(this).parent().remove()
-		})
-	})

@@ -58,21 +58,29 @@ def find_path_to_nearest_sight(G,n,top_ten):
     return min(paths,key=lambda path: duration(G,path))
     
     
-class Walk2(object):
+class Walk(object):
     def __init__(self,G):
         self.g = G
         self.path = []
         self.prev = None
         self.time = 0
         self.accrued_time = 0
+        self.json = []
     def __lshift__(self,node):
         if self.prev: 
             self.accrued_time += self.g.edge[self.prev][node]['time']
         if not node in self.path: # deduplicate on the fly!
-            self.time += self.g.node[node]['time']
-            self.time += self.accrued_time
-            self.accrued_time = 0
+            time = self.g.node[node]['time']
+            if self.prev:
+                self.json.append({
+                    'time':self.accrued_time
+                })
+            self.json.append({
+                'name':node,
+                'time':time})
             self.path.append(node)
+            self.time += time + self.accrued_time
+            self.accrued_time = 0
         self.prev = node
 
 
@@ -85,7 +93,7 @@ def append_random_step(G,w):
 
 
 def find_route(G,top_ten,duration):
-    w = Walk2(G)
+    w = Walk(G)
     w << 'Waterfront Station'
     for _ in range(10):
         path = find_path_to_nearest_sight(G,w.prev,top_ten)
@@ -95,27 +103,58 @@ def find_route(G,top_ten,duration):
             w << each
             if each in top_ten: top_ten.remove(each) 
             if w.time > duration: return w
-        # Then append a random step
-        append_random_step(G,w)
-        if w.time > duration: return w
+        # Then append some random steps
+        for _ in range(2):
+            append_random_step(G,w)
+            if w.time > duration: return w
     for _ in range(10):
         append_random_step(G,w)
         if w.time > duration: return w
     return w
-  
+
+
+def serve_walk_to_website(walk,seed):
+    sights = {}
+    db = mongo_db()
+    for each in db.sights.find({'name':{'$in':walk.path}}):
+        sights[each['name']] = each
+    t = lambda t: int(math.ceil(t/60/5)) * 5
+    n = 0
+    for each in walk.json:
+        each['time'] = t(each['time'])
+        if 'name' in each:
+            s = sights[each['name']]
+            photos = db['flickr'].find({'geotag':{'$near':[s['longitude'],s['latitude']]}})
+            each.update({
+                'latitude':s['latitude'],
+                'longitude':s['longitude'],
+                'description':tweetify(s['description']),
+                'url':s['url'],
+                'photo_url': '', # random.sample(list(photos),1)[0]['url_s'],
+                'cssid':'sight'+str(n),
+                'marker':'http://maps.google.com/mapfiles/marker{}.png'.format(chr(ord('A')+n))
+            })
+            n += 1
+    walk.json[0]['marker'] = 'http://maps.google.com/mapfiles/marker_yellowA.png'
+    walk.json[-1]['marker'] = 'http://maps.google.com/mapfiles/marker_yellowZ.png'
+    return {
+        'seed':seed,
+        'walk':walk.json,
+        'time':walk.time/HOURS
+    }    
+
+
+def itinerary(token,seed):
+    from my_ranking import top_ten_sights_for
+    top_ten = top_ten_sights_for(token)
+    G = read_graph()
+    w = find_route(G,top_ten,6*HOURS)
+    return serve_walk_to_website(w,seed)
+      
   
 if __name__ == "__main__":
     G = read_graph()
-    top_ten = ['David Lam Park',
-     'HR MacMillan Space Centre',
-     'Science World',
-     'Beaty Biodiversity Museum',
-     'Science World & Alcan Omnimax Theatre',
-     'Lynn Canyon Park',
-     'Ecology Centre',
-     'Vanier Park',
-     'University Town',
-     'Vancouver Museum']
+    top_ten = top_ten_sights_for('me')
     w = find_route(G,top_ten,6*HOURS)
     print w.path
     print w.prev

@@ -91,6 +91,7 @@ def bag2bow(dictionary,bag):
 
 
 def top_ten_sights_for(token):
+    if token == 'me': return top_ten_sights_for_me()
     index,lsi,tfidf,dictionary,documents = create_index() 
     name = fb.me(token)['name']
     bag = fb.count_words_in_url_likes(token)
@@ -99,6 +100,18 @@ def top_ten_sights_for(token):
     ranking = sorted(enumerate(sims), key=each[1], reverse=True)
     top10 = map(each[0], itertools.islice(ranking,10))
     return [documents[rank]['name'] for rank in top10]
+
+def top_ten_sights_for_me():
+    return ['David Lam Park',
+     'HR MacMillan Space Centre',
+     'Science World',
+     'Beaty Biodiversity Museum',
+     'Science World & Alcan Omnimax Theatre',
+     'Lynn Canyon Park',
+     'Ecology Centre',
+     'Vanier Park',
+     'University Town',
+     'Vancouver Museum']
 
 
 if __name__ == "__main__":

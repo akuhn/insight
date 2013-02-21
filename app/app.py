@@ -27,20 +27,23 @@ def login(token):
 
 @app.route('/vancouver')
 def vancouver(): 
-    json = my_randomwalk.itinerary(6*HOURS) 
-    return render_template('map.html', 
-        itinerary=json['walk'],
-        seed=json['seed'])
+    token = None
+    if 'fb' in session: token = session['fb']['token']
+    return render_template('map.html',token=token)
+
+
+@app.route('/itinerary/<token>')
+def itinerary(token):
+    from my_routing import itinerary
+    print 222
+    data = itinerary(token,1234)
+    print 333
+    return jsonify(data)
+
 
 @app.route('/me')
 def demo():
-    """
-    For demo on other people's machine!
-    """
-    json = my_randomwalk.itinerary(6*HOURS,me=True) 
-    return render_template('map.html', 
-        itinerary=json['walk'],
-        seed=json['seed'])
+    return render_template('map.html',token='me')
 
 
 @app.route('/hello')

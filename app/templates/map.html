@@ -86,24 +86,15 @@
 			</div>
 			<div class="span7">
 				<h2>Your Personal Day in Vancouver</h2>
-				Based on your Facebook likes and 1,034,651 geotags found on Flickr.
+				<span class="lead">Based on your Facebook likes and 1,034,651 geotags found on Flickr.</span>
 				<hr>
-				<!-- {{ seed }} -->
-				{% for each in itinerary %}
-				{% if each.name %}
-				<div id="{{ each.cssid }}" class="sight">
-							<img src="{{each.photo_url}}" style="float:right;margin:2px 12px 24px 0px;background:silver;width:75px;height:75px;" />
-							<img src="{{each.marker}}" style="float:left;margin:4px 12px 50px 0;">
-							<h4>{{each.name}} <small>&mdash; most people spent {{each.time}} min here</small></h4>
-							<p>{{each.description}}&hellip; (<a href="{{each.url}}">read more on Lonely Planet)</a></p>
-							<br style="clear:both"/>
-							<img class="ex" src="static/close.png">
-				</div>			
-				{% else %}
-					<p style="clear:both">Walk about {{each.time}} min to &hellip;</p>
-				{% endif %}
-				{% endfor %}
+				<div id="throbber">
+					<center style="margin:50px">
+					<p><img src="static/throbber.gif"></p>
+					<p>Please wait while your itinerary is being generated&hellip;</p>
+					</center>
 				</div>
+			</div>
 			</div>
 		</div>				
 	</div>
@@ -113,9 +104,115 @@
   <script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
 	<script src="static/bootstrap/js/bootstrap.js"></script>
 	<script>
-	var path = [{% for each in itinerary %}{% if each.name %}
-		[{{ each.latitude }},{{ each.longitude }},"{{ each.cssid }}","{{ each.marker }}"],
-	{% endif %}{% endfor %}]
+	
+		function initializeMap() {
+			var mapOptions = {
+				mapTypeId: google.maps.MapTypeId.ROADMAP,
+				center: new google.maps.LatLng(49.285, -123.13),
+				zoom: 13,
+				disableDefaultUI: true,
+				zoomControl: true,
+				panControl: true
+			};
+			var canvas = $('#map_canvas')
+			var map = new google.maps.Map(canvas.get(0), mapOptions);
+			canvas.data('map',map)
+		}
+
+		function showDirections(map,walk) {
+			var directionsService = new google.maps.DirectionsService();
+		  var directionsDisplay = new google.maps.DirectionsRenderer();
+		  directionsDisplay.setMap(map);
+			var prev = null
+			walk.forEach(function(each) {
+				if (!each.name) return
+				var curr = new google.maps.LatLng(each.latitude,each.longitude)
+			  if (prev) {
+					var polyline = new google.maps.Polyline({
+						path: [],
+						strokeColor: '#0000FF',
+						strokeWeight: 4
+					});
+					var request = { 
+						origin: prev, 
+						destination: curr, 
+						travelMode: google.maps.DirectionsTravelMode.WALKING, 
+					};
+					directionsService.route(request, function(result, status) { 
+						if (status == google.maps.DirectionsStatus.OK) {
+							path = result.routes[0].overview_path;
+							$(path).each(function(index, item) {
+								polyline.getPath().push(item);
+							})
+							polyline.setMap(map);
+						}
+					});
+			  }
+				prev = curr;
+			})
+		}
+
+		function showItinerary(data) {
+			console.log(data)
+			html = ""
+			console.log(data.walk)
+			$(data.walk).each(function(n,each) {
+				if (each.name) {
+					html += "<div id=" + each.cssid + " class='sight'>"
+					html += "<img src='"+each.photo_url+"' style='float:right;margin:2px 12px 24px 0px;background:silver;width:75px;height:75px;' />"
+					html += "<img src=" + each.marker + " style='float:left;margin:4px 12px 50px 0;'>"
+					html += "<h4>" + each.name + "<small>&mdash; most people spent "+each.time+" min here</small></h4>"
+					html += "<p>"+each.description+"&hellip; (<a href='"+each.url+"'>read more on Lonely Planet)</a></p>"
+					html += "<br style='clear:both'/>"
+					html += "<img class='ex' src='static/close.png'>"
+					html += "</div>"
+				}
+				else {
+					html += "<p style='clear:both'>Walk about "+each.time+" min to &hellip;</p>"
+				}
+			})
+			$('#throbber').replaceWith(html)
+			$(".sight").hover(
+				function() { $(this).find(".ex").show() },
+				function() { $(this).find(".ex").hide() }
+			)
+			$(".sight .ex").click(function() { 
+					console.log($(this).parent().attr('id')) 
+					$(this).parent().data('marker').setMap(null)
+					$(this).parent().remove()
+			})
+			var map = $('#map_canvas').data('map')
+			$(data.walk).each(function(n,each) {
+				if (!each.name) return
+				var loc = new google.maps.LatLng(each.latitude,each.longitude)
+	    	var marker = new google.maps.Marker({
+	        position: loc,
+	        map: map,
+					icon: { 
+						url: each.marker 
+					},
+					shadow: {
+						url: 'http://maps.google.com/mapfiles/shadow50.png',
+						anchor: new google.maps.Point(9, 35),
+					}
+	    	})
+				$('#'+each.cssid).data('marker',marker)
+		    google.maps.event.addListener(marker, 'click', function(){
+					var offset = $('#'+each.cssid).offset();
+					$('html, body').animate({
+					    scrollTop: offset.top - 200,
+					    scrollLeft: offset.left
+					});
+					$('#'+each.cssid).flash();
+				});
+			})
+			showDirections(map,data.walk)
+		}
+
+		function initialize() {
+			initializeMap();
+			$.get('/itinerary/{{token}}',showItinerary)
+		}
+		
 	</script>
-	<script src="static/map.js"></script>
 </body>		

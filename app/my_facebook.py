@@ -59,7 +59,7 @@ def count_words_in_url(url):
     
 def count_words_in_urls(urls):
     bag = collections.Counter()
-    for each in pmap(count_words_in_url,urls[0:50]):
+    for each in pmap(count_words_in_url,urls[0:30]):
         bag.update(each)
     return bag
 
