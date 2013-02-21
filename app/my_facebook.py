@@ -25,14 +25,14 @@ def download(url):
 
 def extend_token(fb_token):
     fb = facebook.GraphAPI(fb_token)
-    json = fb.extend_access_token(config['key'],config['secret'])
-    extended_token = json['access_token']
+    extended = fb.extend_access_token(config['key'],config['secret'])
     me = fb.get_object('me')
-    db.facebook.update(
-        {'id':me['id']}, # query
-        {'id':me['id'],'me':me,'token':extended_token}, #update
-        upsert=True) 
-    return fb.access_token
+    data = {
+        'id':me['id'],
+        'me':me,
+        'token':extended['access_token']}
+    db.facebook.update({'id':me['id']}, data, upsert=True) 
+    return data
 
 
 def me(fb_token):

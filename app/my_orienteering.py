@@ -75,8 +75,23 @@ class Walk(object):
         return sum([each['time'] for each in self.data if 'name' in each])
     def time_between_sights(self):
         return sum([each['time'] for each in self.data if not 'name' in each])
+    def mine(self):
+        w = self
+        w << 'Waterfront Station'
+        w << 'Steam Clock'
+        w << 'Maple Tree Square'
+        w << 'Dr Sun Yat-Sen Classical Chinese Garden & Park'
+        w << 'Maple Tree Square'
+        w << 'Steam Clock'
+        w << 'Vancouver Art Gallery'
+        w << 'HR MacMillan Space Centre'
+        w << 'Granville Island Public Market'
+        w.deduplicate()
+        G = read_graph()
+        w.fetch_time_data(read_graph())
+        return w
     def example(self):
-        w = Walk()
+        w = self
         w << 'Waterfront Station'
         w << 'Steam Clock'
         w << 'Vancouver Art Gallery'
@@ -121,17 +136,11 @@ def best_random_walk(G,time):
             best,hiscore = walk,score
     return best
     
-def itinerary(time):
-    seed = int(unix_epoch())
-    random.seed(seed)
-    G = read_graph()
-    walk = best_random_walk(G,time)
-    
+def serve_walk_to_website(walk,seed):
     sights = {}
     db = mongo_db()
     for each in db.sights.find({'name':{'$in':walk.path}}):
         sights[each['name']] = each
-
     t = lambda t: int(math.ceil(t/60/5)) * 5
     n = 0
     for each in walk.data:
@@ -151,12 +160,19 @@ def itinerary(time):
             n += 1
     walk.data[0]['marker'] = 'http://maps.google.com/mapfiles/marker_yellowA.png'
     walk.data[-1]['marker'] = 'http://maps.google.com/mapfiles/marker_yellowZ.png'
-    json = {
+    return {
         'seed':seed,
         'walk':walk.data,
         'time':walk.time() / 3600.0
-    }
-    return json
+    }    
+    
+def itinerary(time,me=False):
+    if me: return serve_walk_to_website(Walk().mine(),-1)
+    seed = int(unix_epoch())
+    random.seed(seed)
+    G = read_graph()
+    walk = best_random_walk(G,time)
+    return serve_walk_to_website(walk,seed)
 
 if __name__ == "__main__":
-    print itinerary(6*60*60)
+    print Walk().mine().data

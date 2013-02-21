@@ -9,9 +9,9 @@ import my_orienteering
 import my_facebook as fb
 from my_config import db,config
 
-app = Flask(__name__)
-app.secret_key = '???'
+HOURS = 60 * 60
 
+app = Flask(__name__)
 
 @app.route('/')
 def home():
@@ -21,14 +21,23 @@ def home():
 
 @app.route('/login/<token>')
 def login(token):
-    session['token'] = fb.extend_token(token)
+    session['fb'] = fb.extend_token(token)
     return redirect('/vancouver')
 
 
 @app.route('/vancouver')
 def vancouver(): 
-    time = 6 * 60 * 60 # hours
-    json = my_orienteering.itinerary(time) 
+    json = my_orienteering.itinerary(6*HOURS) 
+    return render_template('map.html', 
+        itinerary=json['walk'],
+        seed=json['seed'])
+
+@app.route('/me')
+def demo():
+    """
+    For demo on other people's machine!
+    """
+    json = my_orienteering.itinerary(6*HOURS,me=True) 
     return render_template('map.html', 
         itinerary=json['walk'],
         seed=json['seed'])
@@ -46,4 +55,5 @@ def about():
 
 if __name__ == '__main__':
     app.debug = config['debug']
+    app.secret_key = str(config['secret'])
     app.run(host = config['host'], port = config['port'])
