@@ -30,7 +30,7 @@ def read_graph():
     for a,b in G.edges():
         values = G[a][b]['time']
         if len(values) > 1:
-            G[a][b]['time'] = np.percentile(G[a][b]['time'],50) 
+            G[a][b]['time'] = np.percentile(G[a][b]['time'],25) 
         else:
             G.remove_edge(a,b)          
     return G
@@ -139,6 +139,7 @@ def serve_walk_to_website(walk,seed):
     walk.json[-1]['marker'] = 'http://maps.google.com/mapfiles/marker_yellowZ.png'
     return {
         'seed':seed,
+        'path':walk.path,
         'walk':walk.json,
         'time':walk.time/HOURS
     }    

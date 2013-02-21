@@ -35,9 +35,11 @@ def vancouver():
 @app.route('/itinerary/<token>')
 def itinerary(token):
     from my_routing import itinerary
-    print 222
     data = itinerary(token,1234)
-    print 333
+    print '-'*40
+    print "Serving an itinerary:"
+    print ' => '.join(data['path'])
+    print '{} hours'.format(data['time'])
     return jsonify(data)
 
 
