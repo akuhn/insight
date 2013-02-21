@@ -5,7 +5,7 @@ import facebook
 import random
 import json
 #
-import my_orienteering
+import my_randomwalk
 import my_facebook as fb
 from my_config import db,config
 
@@ -27,7 +27,7 @@ def login(token):
 
 @app.route('/vancouver')
 def vancouver(): 
-    json = my_orienteering.itinerary(6*HOURS) 
+    json = my_randomwalk.itinerary(6*HOURS) 
     return render_template('map.html', 
         itinerary=json['walk'],
         seed=json['seed'])
@@ -37,7 +37,7 @@ def demo():
     """
     For demo on other people's machine!
     """
-    json = my_orienteering.itinerary(6*HOURS,me=True) 
+    json = my_randomwalk.itinerary(6*HOURS,me=True) 
     return render_template('map.html', 
         itinerary=json['walk'],
         seed=json['seed'])
