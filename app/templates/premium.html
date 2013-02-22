@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<link href="static/bootstrap/css/bootstrap.css" rel="stylesheet">
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+  <title>Stripe Getting Started Form</title>
+  <script type="text/javascript" src="https://js.stripe.com/v1/"></script>
+  <!-- jQuery is used only for this example; it isn't required to use Stripe -->
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+  <script type="text/javascript">
+    // this identifies your website in the createToken call below
+    Stripe.setPublishableKey({{key|safe}});
+
+    function stripeResponseHandler(status, response) {
+      if (response.error) {
+        // Show the errors on the form
+        $('.payment-errors').text(response.error.message);
+        $('.submit-button').prop('disabled', false);
+      } else {
+        var $form = $('#payment-form');
+        // token contains id, last4, and card type
+        var token = response.id;
+        // Insert the token into the form so it gets submitted to the server
+        $form.append($('<input type="hidden" name="stripeToken" />').val(token));
+        // and submit
+        $form.get(0).submit();
+      }
+    }
+
+    $(function() {
+      $('#payment-form').submit(function(event) {
+        // Disable the submit button to prevent repeated clicks
+        $('.submit-button').prop('disabled', true);
+
+        Stripe.createToken({
+          number: $('.card-number').val(),
+          cvc: $('.card-cvc').val(),
+          exp_month: $('.card-expiry-month').val(),
+          exp_year: $('.card-expiry-year').val()
+        }, stripeResponseHandler);
+
+        // Prevent the form from submitting with the default action
+        return false;
+      });
+    });
+  </script>
+	<style>
+		body {
+			padding-top: 60px;
+		}	
+		input.card-expiry-month input.card-expiry-year {
+		}
+		.jumbotron {
+			text-align: center;
+		}
+		.jumbotron p {
+			margin: 12px;
+		}
+	</style>
+</head>
+<body>
+	
+  <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
+        <a class="brand" href="http://serendipityengineapp.com">Serendipty Engine</a>
+        <div class="nav-collapse collapse pull-right">
+          <ul class="nav">
+            <li class="active"><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="http://twitter.com/akuhn">@akuhn</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Vancouver <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li class="nav-header">Coming soon</li>
+                <li><a href="#">Beijing</a></li>
+                <li><a href="#">Paris</a></li>
+                <li><a href="#">Rome</a></li>
+                <li><a href="#">San Francisco</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+	</div>  
+    </div>
+  </div>
+	
+    <div class="container">
+		<div class="jumbotron hero-unit">
+
+		<h1>Become a Globetrotter!</h1>
+		
+		<p class="lead">Our premium Globetrotter plan offers no benefits. Sign up today!</p> 
+		
+		<p>&nbsp;</p>
+		
+		<div>
+			<p class="payment-errors"></p>
+			<form action="/stripe" method="POST" id="payment-form">
+				<p>
+        	<span>Card Number</span>
+        	<input type="text" size="20" autocomplete="off" class="card-number"/>
+				</p>
+				<p>
+      		<span>CVC</span>
+      		<input type="text" size="4" autocomplete="off" class="card-cvc"  style="width:50px"/>
+	        <span>Expiry</span>
+	        <input type="text" size="2" class="card-expiry-month" style="width:50px"/>
+	      	<span> / </span>
+    			<input type="text" size="4" class="card-expiry-year"  style="width:50px"	/>
+				</p>
+				<p>
+					<button type="submit" class="btn btn-large btn-success submit-button">Submit Payment</button>
+				</p>
+  		</form>
+		</div>
+	</div>
+
+</body>
+</html>

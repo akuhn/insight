@@ -57,6 +57,33 @@ def hello_world():
 def about():
     return render_template('about.html')
 
+# Handle premium memberships
+
+@app.route('/premium')
+def subscribe():
+    key = config['stripe']['key']
+    return render_template('premium.html',
+        key=json.dumps(key))
+    
+@app.route('/stripe', methods=['POST'])
+def charge():
+    import stripe
+    # set your secret key: remember to change this to your live secret key in production
+    # see your keys here https://manage.stripe.com/account
+    stripe.api_key = config['stripe']['secret']
+
+    # get the credit card details submitted by the form
+    token = request.form['stripeToken']
+
+    # create the charge on Stripe's servers - this will charge the user's card
+    charge = stripe.Charge.create(
+        amount=1000, # amount in cents, again
+        currency="usd",
+        card=token,
+        description="payinguser@example.com"
+    )
+    return "Charged!"
+
 
 if __name__ == '__main__':
     app.debug = config['debug']
