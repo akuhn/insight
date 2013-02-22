@@ -1,6 +1,8 @@
 """
-GHL's original threading source:
-https://gist.github.com/ghl3/4556336
+Parallel map function.
+
+Based on https://gist.github.com/ghl3/4556336
+
 """
 import threading
 from Queue import Queue
@@ -48,6 +50,7 @@ def pmap(callback, urls, nThreads=8):
     for thread in threads:
         results += thread.results
     return results
+    
     
 if __name__ == "__main__":
     print pmap(lambda x: x*x,range(10))

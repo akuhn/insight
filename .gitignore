@@ -1,2 +1,4 @@
+cache_*
+config.json
 token-*.json
 *.pyc

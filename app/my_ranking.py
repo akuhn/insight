@@ -1,3 +1,15 @@
+"""
+Given a user's facebook token finds the top 10 sights.
+
+Uses latent semantic indexing to index all sights. And then queries the index
+with the words found in recent Facebook likes to identify sights the user
+might be most interested in.
+
+Assumes that we find a good travel signal in a user's recent likes. Which is 
+not always given, but I've found that people are amazing in rationalizing
+random results, so we're good :)
+
+"""
 from gensim import corpora, models, similarities, utils
 from nltk.corpus import stopwords
 import sys
@@ -11,11 +23,9 @@ from my_config import db,config
 from my_util import *
 import my_facebook as fb
 
+TOP = 10
+TOPICS = 7
 
-"""
-Given a facebook token, find the top 10 sights.
-
-"""
 
 # Setup stopwords
 
@@ -26,15 +36,13 @@ stoplist.append('place')
 
 
 def append_word(words,w,count):
+
+    # Appends word to list, but short words and stopwords
+
     if len(w) < 5: return
     if w in stoplist: return
     for n in range(count):
         words.append(w)
-
-
-class Identity(object):
-    def __getitem__(self,key):
-        return key
 
 
 def create_sight_corpus():
@@ -74,14 +82,15 @@ def create_sight_corpus():
 def create_index():
     corpus,dictionary,documents = create_sight_corpus()    
     tfidf = models.TfidfModel(corpus)
-    # tfidf = Identity()
-    lsi = models.LsiModel(tfidf[corpus], num_topics=25)
+    lsi = models.LsiModel(tfidf[corpus], num_topics=TOPICS)
     index = similarities.SparseMatrixSimilarity(lsi[tfidf[corpus]],num_features=len(dictionary))
     return index,lsi,tfidf,dictionary,documents  
 
 
 def bag2bow(dictionary,bag):
-    # apparently dictionary.doc2bow does not work with Counter() !?
+    
+    # Apparently dictionary.doc2bow does not work with counter !?
+    
     v = []
     for word,count in bag.iteritems():
         n = dictionary.token2id.get(word)
@@ -91,17 +100,30 @@ def bag2bow(dictionary,bag):
 
 
 def top_ten_sights_for(token):
+    
+    # Hard-wired itinerary for demo.
+    
     if token == 'me': return top_ten_sights_for_me()
+    
+    # Create index of sights
+    
     index,lsi,tfidf,dictionary,documents = create_index() 
-    name = fb.me(token)['name']
+    
+    # Connect words in facebook likes
+    
     bag = fb.count_words_in_url_likes(token)
-    # print bag
+    
+    # Get ranking of sights
+    
     v = bag2bow(dictionary,bag)
     sims = index[lsi[tfidf[v]]]
     ranking = sorted(enumerate(sims), key=each[1], reverse=True)
-    # print ranking
-    top10 = map(each[0], itertools.islice(ranking,10))
+    
+    # Return name of top 10 sights
+    
+    top10 = map(each[0], itertools.islice(ranking,TOP))
     return [documents[rank]['name'] for rank in top10]
+
 
 def top_ten_sights_for_me():
     return ['David Lam Park',

@@ -1,3 +1,9 @@
+"""
+Generates random walks.
+
+=> Previous algorithm, not used anymore!!!
+
+"""
 import networkx as nx
 import numpy as np
 from time import time as unix_epoch

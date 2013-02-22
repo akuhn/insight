@@ -1,13 +1,17 @@
-import urllib2
-import re as regex
-import facebook
+"""
+Downloads content of recent facebook likes and counts words.
+"""
 import collections
+import re as regex
+import urllib2
+import facebook
 import lxml.html as lxml
 #
 from my_util import each
 from my_parallel import pmap
 from my_config import *
 
+RECENT = 30
 
 def download(url):
     """
@@ -25,7 +29,7 @@ def download(url):
 
 def extend_token(fb_token):
     fb = facebook.GraphAPI(fb_token)
-    extended = fb.extend_access_token(config['key'],config['secret'])
+    extended = fb.extend_access_token(config['fb']['key'],config['fb']['secret'])
     me = fb.get_object('me')
     data = {
         'id':me['id'],
@@ -59,7 +63,7 @@ def count_words_in_url(url):
     
 def count_words_in_urls(urls):
     bag = collections.Counter()
-    for each in pmap(count_words_in_url,urls[0:30]):
+    for each in pmap(count_words_in_url,urls[0:RECENT]):
         bag.update(each)
     return bag
 

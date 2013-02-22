@@ -1,3 +1,11 @@
+"""
+Magic happens here.
+
+Given the graph of all tourist paths, start at a major public transit hub, eg
+Waterfront Stations, look for the nearest top 10 sights, walk there, take one
+random step, and repeat. 
+
+"""
 import networkx as nx
 import numpy as np
 from time import time as unix_epoch
@@ -9,24 +17,40 @@ import random
 #
 from my_util import *
 
+BEST_OF_TWENTY = 20
+
 def mongo_db():
     return pymongo.MongoClient()['insight']
 
 def read_graph():
+    
+    # Read graph from database and fill in networkx graph
+    
     db = mongo_db()
     g = db.graph.find_one()
     G = nx.Graph()
+    
+    # Each node is a sight, time at sight is 75% percentile of time between
+    # first and last photo taken by others at that sight.
+    
     for each,values in g['nodes'].items():
         if len(values) == 0:
             G.add_node(each,time=1)
         else:    
             G.add_node(each,time=np.percentile(values,75))
+    
+    # Turn directed into undirected graph, merging time data. 
+    
     for a,more in g['edges'].items():
         for b,values in more.items():
             G.add_edge(a,b)
             e,k = G[a][b],'time'
             if not e.has_key(k): e[k] = []  
-            e[k] += values    
+            e[k] += values
+            
+    # Time between sights is median of last photo taken by others at previous 
+    # sight and first at next sight.        
+                
     for a,b in G.edges():
         values = G[a][b]['time']
         if len(values) > 1:
@@ -37,6 +61,9 @@ def read_graph():
 
 
 def duration(G,path):
+    
+    # walking time between a sights in a path
+    
     time = 0
     prev = None
     for each in path:
@@ -47,18 +74,24 @@ def duration(G,path):
     
 
 def find_path_to_nearest_sight(G,n,top_ten):
+    
+    # Given node n find path to nearest top 10 sight, or none
+    
     paths = []
     for each in top_ten:
         try:
             if not each in G: continue
             paths.append(nx.shortest_path(G,n,each))
         except nx.NetworkXNoPath:
-            pass  
+            pass
     if len(paths) == 0: return None
     return min(paths,key=lambda path: duration(G,path))
     
     
 class Walk(object):
+    """
+    An itinerary. Keeps track of path, total time and json payload.
+    """
     def __init__(self,G):
         self.g = G
         self.path = []
@@ -67,10 +100,19 @@ class Walk(object):
         self.accrued_time = 0
         self.json = []
     def __lshift__(self,node):
+        
+        # Accrue walking time between sights
+        
         if self.prev: 
-            self.accrued_time = 0.5 * self.accrued_time + self.g.edge[self.prev][node]['time']
-        if not node in self.path: # deduplicate on the fly!
+            self.accrued_time = 0.8 * self.accrued_time + self.g.edge[self.prev][node]['time']
+            
+        # Append sight, skipping duplicates
+            
+        if not node in self.path: 
             time = self.g.node[node]['time']
+            
+            # Construct json payload
+            
             if self.prev:
                 self.json.append({
                     'time':self.accrued_time
@@ -78,32 +120,63 @@ class Walk(object):
             self.json.append({
                 'name':node,
                 'time':time})
+                
+            # Actually append node
+            
             self.path.append(node)
+            
+            # Add time at sights as well as accrued time between sights
+            
             self.time += time + self.accrued_time
             self.accrued_time = 0
+            
         self.prev = node
     def time_at_sights(self):
+        
+        # Cost function for time at sight
+        
         values = [each['time'] for each in self.json if 'name' in each]
         return sum(values)
     def time_between_sights(self):
+        
+        # Cost function for time between sights (square beyond 25 minutes)
+        
         values = [each['time'] for each in self.json if not 'name' in each]
         return sum([x**1.2 for x in values if x > 25])
         
 
 
 def append_random_step(G,w,top_ten):
+
+    # Sample a random neighbor but the current node
+
     more = G.neighbors(w.prev)
     if w.prev in more: more.remove(w.prev)
     if len(more) == 0: return 
     n = random.sample(more,1)[0]
+    
+    # Append to itinerary
+    
     w << n
+    
+    # Remove from top 10 sights
+    
     if each in top_ten: top_ten.remove(each) 
 
 
 def find_route(G,top_ten,duration):
+
+    # Start at a major public transit hub
+    
     w = Walk(G)
     w << 'Waterfront Station'
+    
+    # 10.times { ... }
+    
     for _ in range(10):
+        
+        # Walk to nearest top 10 sight
+        
         path = find_path_to_nearest_sight(G,w.prev,top_ten)
         if not path: return w
         path.pop(0) # remove first element
@@ -111,27 +184,42 @@ def find_route(G,top_ten,duration):
             w << each
             if each in top_ten: top_ten.remove(each) 
             if w.time > duration: return w
-        # Then append some random steps
+            
+        # Append two random steps to itinerary
+        
         for _ in range(2):
             append_random_step(G,w,top_ten)
             if w.time > duration: return w
+            
+    # Once we're out of nearest sights, keep walking randomly ...
+            
     for _ in range(10):
         append_random_step(G,w,top_ten)
         if w.time > duration: return w
+        
     return w
 
 
 def fitness(walk,duration):
+    
+    # Fitness function for generated itineraries
+    
     return 0.25 * walk.time_at_sights() - walk.time_between_sights()  
 
 
 def find_best_route_of_many(G,top_ten,duration):
-    many = [find_route(G,list(top_ten),duration) for _ in range(20)]
+    
+    # Find best of BEST_OF_TWENTY paths
+    
+    many = [find_route(G,list(top_ten),duration) for _ in range(BEST_OF_TWENTY)]
     best = max(many,key=lambda each: fitness(each,duration))
     return best
 
 
 def serve_walk_to_website(walk,seed):
+    
+    # Wrap the itinerary in a rich set of jsonified data
+    
     sights = {}
     db = mongo_db()
     for each in db.sights.find({'name':{'$in':walk.path}}):
