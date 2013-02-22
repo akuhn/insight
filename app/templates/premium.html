@@ -100,7 +100,7 @@
 		<p>&nbsp;</p>
 		
 		<div>
-			<p class="payment-errors"></p>
+			<p style="color:red" class="payment-errors"></p>
 			<form action="/stripe" method="POST" id="payment-form">
 				<p>
         	<span>Card Number</span>
@@ -115,11 +115,12 @@
     			<input type="text" size="4" class="card-expiry-year"  style="width:50px"	/>
 				</p>
 				<p>
-					<button type="submit" class="btn btn-large btn-success submit-button">Submit Payment</button>
+					<button type="submit" class="btn btn-large btn-warning submit-button">$10 Lifetime Membership</button>
 				</p>
   		</form>
 		</div>
 	</div>
+	<center><small>* for a trial membership use 4242-4242-4242-4242 as card number</small></center>
 
 </body>
 </html>

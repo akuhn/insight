@@ -82,7 +82,7 @@ def charge():
         card=token,
         description="payinguser@example.com"
     )
-    return "Charged!"
+    return render_template('charged.html')
 
 
 if __name__ == '__main__':
