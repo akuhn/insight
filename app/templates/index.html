@@ -45,7 +45,6 @@
 <body>
 	<div id="fb-root"></div>
 	<script>
-	  // Additional JS functions here
 	  window.fbAsyncInit = function() {
 	    FB.init({
 	      appId: {{ facebook_key }},
@@ -53,7 +52,6 @@
 	      cookie: true
 	    });
 	  };
-				
 		function connect() {
 	    FB.login(function(response) {
         if (response.authResponse) {
@@ -63,7 +61,6 @@
         }
 		  }, {scope:'user_likes'});
 		}
-				
 	  // Load the SDK Asynchronously
 	  (function(d){
 	     var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
@@ -100,17 +97,18 @@
             </li>
           </ul>
         </div>
-	</div>  
+			</div>  
     </div>
   </div>
 	
-    <div class="container">
+  <div class="container">
 		<div class="jumbotron hero-unit">
 			<h1>One Day in Town?</h1>
 			<p class="lead">We got you covered. Get your personalized day now!</p>
 			<button class="btn btn-large btn-success" onclick="connect()">Connect with Facebook</button>
 		</div>
-    </div>
+  </div>
+	<center><small>* No facebook login? Click <a href="/me">here</a> for a generic itinerary.</small></center>
 
 </body>		
 </html>
