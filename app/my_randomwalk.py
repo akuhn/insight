@@ -1,7 +1,5 @@
 """
-Generates random walks.
-
-=> Previous algorithm, not used anymore!!!
+Generates random walks => old algorithm, not used anymore!!!
 
 """
 import networkx as nx

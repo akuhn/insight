@@ -28,8 +28,14 @@ def download(url):
         return None    
 
 def extend_token(fb_token):
+    
+    # Get extended 60 day token
+    
     fb = facebook.GraphAPI(fb_token)
     extended = fb.extend_access_token(config['fb']['key'],config['fb']['secret'])
+    
+    # Upsert about me and token in database
+    
     me = fb.get_object('me')
     data = {
         'id':me['id'],

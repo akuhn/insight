@@ -5,21 +5,21 @@
 	<style>
 		body {
 			padding-top: 60px;
-		}	
+		}
 		.square {
-		    display: inline-block;
-		    position: relative;
-		    width: 100%;
+				display: inline-block;
+				position: relative;
+				width: 100%;
 		}
 		.square_ratio {
-		    margin-top: 100%;
+				margin-top: 100%;
 		}
 		.square_div {
-		    position: absolute;
-		    top: 0;
-		    bottom: 0;
-		    left: 0;
-		    right: 0;
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0;
 				background: silver;
 		}
 		.sight {
@@ -34,54 +34,54 @@
 		}
 		.sight .ex, .sight .marker {
 			cursor: pointer;
-	  }
+		}
 	</style>
 </head>
 <body onload="initialize()">
 
-    <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <a class="brand" href="http://serendipityengineapp.com">Serendipty Engine</a>
-          <div class="nav-collapse collapse pull-right">
-            <ul class="nav">
-              <li><a href="/">Home</a></li>
-              <li><a href="/about">About</a></li>
-              <li><a href="http://twitter.com/akuhn">@akuhn</a></li>
-              <li class="active dropdown">
-                <a href="/vancouver" class="dropdown-toggle" data-toggle="dropdown">Vancouver <b class="caret"></b></a>
-                <ul class="dropdown-menu">
-                  <li class="nav-header">Coming soon</li>
-                  <li><a href="#">Beijing</a></li>
-                  <li><a href="#">Paris</a></li>
-                  <li><a href="#">Rome</a></li>
-                  <li><a href="#">San Francisco</a></li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-		</div>  
-      </div>
-    </div>
-	
+		<div class="navbar navbar-inverse navbar-fixed-top">
+			<div class="navbar-inner">
+				<div class="container">
+					<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</a>
+					<a class="brand" href="http://serendipityengineapp.com">Serendipty Engine</a>
+					<div class="nav-collapse collapse pull-right">
+						<ul class="nav">
+							<li><a href="/">Home</a></li>
+							<li><a href="/about">About</a></li>
+							<li><a href="http://twitter.com/akuhn">@akuhn</a></li>
+							<li class="active dropdown">
+								<a href="/vancouver" class="dropdown-toggle" data-toggle="dropdown">Vancouver <b class="caret"></b></a>
+								<ul class="dropdown-menu">
+									<li class="nav-header">Coming soon</li>
+									<li><a href="#">Beijing</a></li>
+									<li><a href="#">Paris</a></li>
+									<li><a href="#">Rome</a></li>
+									<li><a href="#">San Francisco</a></li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+		</div>
+			</div>
+		</div>
+
 	<div class="container">
 		<div class="row">
 			<div class="span5">
 				<div style="position:fixed;width:470px">
 					<div class="square" style="margin: 16 0">
-				    <div class="square_ratio"></div>
-				    <div id="map_canvas" class="square_div">
-				    </div>
+						<div class="square_ratio"></div>
+						<div id="map_canvas" class="square_div">
+						</div>
 					</div>
 					<p>
 						<bigger><b>Total time:</b> 6 hours (including lunch/coffee breaks)</bigger>
 						<!-- ><h3>But, <a href="">how has this been generated?</a></h3> -->
-					</p>	
+					</p>
 				</div>
 			</div>
 			<div class="span7">
@@ -96,22 +96,35 @@
 				</div>
 			</div>
 			</div>
-		</div>				
+		</div>
 	</div>
 
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
 	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.0/jquery-ui.min.js"></script>
-  <script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+	<script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
 	<script src="static/bootstrap/js/bootstrap.js"></script>
 	<script>
 
 		jQuery.fn.flash = function() {
-	    var current = this.css('color')
-	    this.animate( { 'background-color': 'rgb(255,255,127)'}, 500 )
-	    this.animate( { 'background-color': 'white'}, 500 )
+			var current = this.css('color')
+			this.animate({'background-color':'rgb(255,255,127)'}, 500)
+			this.animate({'background-color':'white'}, 500)
 		}
+		
 
-	
+		function initialize() {
+			initializeMap();
+			$.get('/itinerary/{{token}}', function(data) {
+				var html = renderItinerary(data)
+				$('#throbber').replaceWith(html)
+				whenHoveringOverSightShowRemoveIcon()
+				var map = $('#map_canvas').data('map')
+				setupMarkers(map,data)
+				showDirections(map,data.walk)
+			})
+		}
+		
+
 		function initializeMap() {
 			var mapOptions = {
 				mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -126,43 +139,9 @@
 			canvas.data('map',map)
 		}
 
-		function showDirections(map,walk) {
-			var directionsService = new google.maps.DirectionsService();
-		  var directionsDisplay = new google.maps.DirectionsRenderer();
-		  directionsDisplay.setMap(map);
-			var prev = null
-			walk.forEach(function(each) {
-				if (!each.name) return
-				var curr = new google.maps.LatLng(each.latitude,each.longitude)
-			  if (prev) {
-					var polyline = new google.maps.Polyline({
-						path: [],
-						strokeColor: '#0000FF',
-						strokeWeight: 4
-					});
-					var request = { 
-						origin: prev, 
-						destination: curr, 
-						travelMode: google.maps.DirectionsTravelMode.WALKING, 
-					};
-					directionsService.route(request, function(result, status) { 
-						if (status == google.maps.DirectionsStatus.OK) {
-							path = result.routes[0].overview_path;
-							$(path).each(function(index, item) {
-								polyline.getPath().push(item);
-							})
-							polyline.setMap(map);
-						}
-					});
-			  }
-				prev = curr;
-			})
-		}
 
-		function showItinerary(data) {
-			console.log(data)
+		function renderItinerary(data) {
 			html = ""
-			console.log(data.walk)
 			$(data.walk).each(function(n,each) {
 				if (each.name) {
 					html += "<div id=" + each.cssid + " class='sight'>"
@@ -176,62 +155,92 @@
 				}
 				else {
 					html += "<p style='clear:both'>Walk about "+each.time+" min "
-					if (each.time > 60) {
-						html += ' (including lunch break)'
-					} 
-					else if (each.time > 40) {
-						html += ' (including coffee break)'
-					} 
+					if (each.time > 60) { html += ' (including lunch break)' }
+					else if (each.time > 40) { html += ' (including coffee break)' }
 					html += " to &hellip;</p>"
 				}
 			})
-			$('#throbber').replaceWith(html)
+			return html
+		}
+
+		
+		function whenHoveringOverSightShowRemoveIcon() {
 			$(".sight").hover(
 				function() { $(this).find(".ex").show() },
 				function() { $(this).find(".ex").hide() }
 			)
-			$(".sight .ex").click(function() { 
-					console.log($(this).parent().attr('id')) 
+			$(".sight .ex").click(function() {
+					console.log($(this).parent().attr('id'))
 					$(this).parent().data('marker').setMap(null)
 					$(this).parent().remove()
+			})
+		}
+		
+		
+		function setupMarkers(map,data) {
+			$(data.walk).each(function(n,each) {
+				if (!each.name) return
+				var loc = new google.maps.LatLng(each.latitude,each.longitude)
+				var marker = new google.maps.Marker({
+					position: loc,
+					map: map,
+					icon: {
+						url: each.marker
+					},
+					shadow: {
+						url: 'http://maps.google.com/mapfiles/shadow50.png',
+						anchor: new google.maps.Point(9, 35),
+					}
+				})
+				$('#'+each.cssid).data('marker',marker)
+				google.maps.event.addListener(marker, 'click', function(){
+					var offset = $('#'+each.cssid).offset();
+					$('html, body').animate({
+							scrollTop: offset.top - 200,
+							scrollLeft: offset.left
+					});
+					$('#'+each.cssid).flash();
+				});
 			})
 			$(".sight .marker").click(function() {
 					var marker = $(this).parent().data('marker')
 					marker.setAnimation(google.maps.Animation.BOUNCE)
 					setTimeout(function(){ marker.setAnimation(null) }, 1444)
 			})
-			var map = $('#map_canvas').data('map')
-			$(data.walk).each(function(n,each) {
-				if (!each.name) return
-				var loc = new google.maps.LatLng(each.latitude,each.longitude)
-	    	var marker = new google.maps.Marker({
-	        position: loc,
-	        map: map,
-					icon: { 
-						url: each.marker 
-					},
-					shadow: {
-						url: 'http://maps.google.com/mapfiles/shadow50.png',
-						anchor: new google.maps.Point(9, 35),
-					}
-	    	})
-				$('#'+each.cssid).data('marker',marker)
-		    google.maps.event.addListener(marker, 'click', function(){
-					var offset = $('#'+each.cssid).offset();
-					$('html, body').animate({
-					    scrollTop: offset.top - 200,
-					    scrollLeft: offset.left
-					});
-					$('#'+each.cssid).flash();
-				});
-			})
-			showDirections(map,data.walk)
-		}
-
-		function initialize() {
-			initializeMap();
-			$.get('/itinerary/{{token}}',showItinerary)
 		}
 		
+
+		function showDirections(map,walk) {
+			var directionsService = new google.maps.DirectionsService();
+			var directionsDisplay = new google.maps.DirectionsRenderer();
+			directionsDisplay.setMap(map);
+			var prev = null
+			walk.forEach(function(each) {
+				if (!each.name) return
+				var curr = new google.maps.LatLng(each.latitude,each.longitude)
+				if (prev) {
+					var polyline = new google.maps.Polyline({
+						path: [],
+						strokeColor: '#0000FF',
+						strokeWeight: 4
+					});
+					var request = {
+						origin: prev,
+						destination: curr,
+						travelMode: google.maps.DirectionsTravelMode.WALKING,
+					};
+					directionsService.route(request, function(result, status) {
+						if (status == google.maps.DirectionsStatus.OK) {
+							path = result.routes[0].overview_path;
+							$(path).each(function(index, item) {
+								polyline.getPath().push(item);
+							})
+							polyline.setMap(map);
+						}
+					});
+				}
+				prev = curr;
+			})
+		}
 	</script>
-</body>		
+</body>

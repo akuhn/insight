@@ -54,7 +54,7 @@ def demo():
 @app.route('/itinerary/<token>')
 def itinerary(token):
     """
-    Computes itinerart and serves it as json.
+    Computes itinerary and serves it as json.
     """
     from my_routing import itinerary
     data = itinerary(token,1234)

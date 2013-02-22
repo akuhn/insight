@@ -62,7 +62,7 @@ def read_graph():
 
 def duration(G,path):
     
-    # walking time between a sights in a path
+    # walking time between sights in a path
     
     time = 0
     prev = None

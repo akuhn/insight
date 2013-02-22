@@ -1,5 +1,5 @@
 """
-Reads configuration from condig.json file.
+Reads configuration from config.json file.
 
 Expected keys are:
     host
