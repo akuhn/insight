@@ -1,10 +1,26 @@
 <html>
 <head>
-	<link href="static/bootstrap/css/bootstrap.css" rel="stylesheet">
+	<link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet">
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+	<script src="/static/bootstrap/js/bootstrap.js"></script>
 	<style>
 		body {
+			background: url(static/img/cover-switzerland.jpg);
+			background-size: cover;
 	    padding-top: 60px;
 	    padding-bottom: 40px;
+		}
+		.navbar-inverse .navbar-inner {
+			background-color: #252C25;
+		}
+		.jumbotron {
+			text-align: center;
+			background: -moz-radial-gradient(circle, 
+				rgba(245, 246, 241, 0.7), 
+				rgba(245, 246, 241, 0.5));
+			background: -webkit-radial-gradient(circle, 
+				rgba(245, 246, 241, 0.7), 
+				rgba(245, 246, 241, 0.5));
 		}
 		.jumbotron h1 {
 			font-size: 64px;
@@ -14,6 +30,19 @@
 			margin-top: 24px;
 			margin-bottom: 72px;
 		}
+		.jumbotron a.btn {
+			margin-left: 24px;
+			margin-right: 24px;
+		}
+		
+		/* #79B5EB, #252C25, #F5F6F1, 
+		   #445147 => dark green,
+		   #84A90B => light green,
+		   #B8D1E7	*/
+		/* (121, 181, 235), (37, 44, 37), 
+		   (245, 246, 241), (68, 81, 71), 
+		   (132, 169, 11), (184, 209, 231) */	 
+		
 	</style>
 </head>
 <body>
@@ -31,7 +60,6 @@
           <ul class="nav">
             <li><a href="/">Home</a></li>
             <li class="active"><a href="/about">About</a></li>
-            <li><a href="http://twitter.com/akuhn">@akuhn</a></li>
             <li class="dropdown">
               <a href="/vancouver" class="dropdown-toggle" data-toggle="dropdown">Vancouver <b class="caret"></b></a>
               <ul class="dropdown-menu">
@@ -50,19 +78,12 @@
 	
     <div class="container">
 			<div class="jumbotron hero-unit">
-				<h1>serendipityengine<span style="color:gray">app.com</span></h1>
-				<p class="lead">Your personal travel assistant!
-					<br>
-					&nbsp;
-					<br>
-					This page has been created by <a href="http://twitter.com/akuhn">@akuhn</a>
-					<br>
-					&nbsp;
-					<br>
-					Check my <a href="http://linkedin.com/in/adriankuhn">LinkedIn</a> 
-				</p>	
+				<h1 style="color:#252C25">serendipityengine<span style="color:#84A90B">app.com</span></h1>
+				<p class="lead">Your personal travel assistant!</p>	
+				<a class="btn btn-large btn-info" href="http://twitter.com/akuhn">Follow me on Twitter</a>
+				<a class="btn btn-large btn-info" href="http://linkedin.com/in/adriankuhn">Check my LinkedIn</a>
+				<a class="btn btn-large btn-info" href="http://github.com/akuhn/insight">Browse code on Github</a>
 			</div>
-			
 		</div>	
 
 </body>		
