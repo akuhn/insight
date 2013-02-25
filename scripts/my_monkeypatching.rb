@@ -46,6 +46,7 @@ module Enumerable
     inject(&:+)
   end
   def percentile(f)
+    raise "Expecting value between 0.0 and 1.0!" if f > 1
     return nil if empty?
     sorted = self.sort
     n = f.to_f * (self.size - 1)
@@ -108,5 +109,12 @@ if $0 == __FILE__ then
   
   [1,2,3.3,3.4,4,5].sum.should == 18.7
   [1,2,3.3,3.4,4,5].average.should_s == '3.11666666666667'
+  
+  # Percentile, you darn beast!
+  
+  [1,2,3,4,5].percentile(0.25).should == 2
+  [1,2,3,4,5].percentile(0.75).should == 4
+  [1,2,3,4].percentile(0.5).should == 2.5
+  [1,2].percentile(0.25).should == 1.25
   
 end
