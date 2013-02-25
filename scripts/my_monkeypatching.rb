@@ -42,6 +42,9 @@ module Enumerable
   def average
     inject(&:+) / size
   end
+  def sum
+    inject(&:+)
+  end
   def percentile(f)
     return nil if empty?
     sorted = self.sort
@@ -67,4 +70,43 @@ def parse_time(str)
   Time.utc(*str.scan(/\d+/).collect(&:to_i))
 end
 
+# A poor man's testing framework
+
+class Should
+  def initialize(value)
+    @value = value
+  end
+  def ==(expected)    
+    raise "Found #{@value.inspect} but expected #{expected.inspect}" unless @value == expected
+  end
+end
+
+class Object
+  def should
+    Should.new(self)
+  end
+  def should_s
+    Should.new(self.to_s)
+  end
+end
+
 # (end)
+
+if $0 == __FILE__ then
+  1.should == 1
+  
+  # Hash.method_missing hack
+  
+  {:hello=>'world'}.hello.should == 'world'
+  {:id=>23}.id.should == 23
+  
+  # Array.but_last
+  
+  [1,2,3].but_last.should == [1,2]
+  
+  # Describtive statistics
+  
+  [1,2,3.3,3.4,4,5].sum.should == 18.7
+  [1,2,3.3,3.4,4,5].average.should_s == '3.11666666666667'
+  
+end
