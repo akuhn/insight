@@ -15,6 +15,20 @@ class String
   end
 end
   
+class Numeric
+  def sqrt
+    Math.sqrt(self)
+  end
+  def square
+    self**2
+  end
+  def f3
+    '%.3f' % self
+  end
+  def f6
+    '%.6f' % self
+  end
+end
 
 module Enumerable
   def fmap#{|each|}
@@ -26,6 +40,7 @@ module Enumerable
     h.sort_by{|k,count|count}.reverse
   end
   def split_where # {|a,b|}
+    return [] if empty?
     runs = [[first]]
     each_cons(2){|a,b|
       runs << [] if yield(a,b)
@@ -39,11 +54,18 @@ module Enumerable
   def sample
     shuffle.first
   end
-  def average
-    inject(&:+) / size
+  def mean
+    inject(&:+)/size.to_f
   end
   def sum
     inject(&:+)
+  end
+  def variance
+    mean = self.mean
+    collect{|x|(mean-x)**2}.sum / (self.size-1)
+  end
+  def stdev
+    variance.sqrt
   end
   def percentile(f)
     raise "Expecting value between 0.0 and 1.0!" if f > 1
@@ -83,18 +105,27 @@ class Should
 end
 
 class Object
-  def should
-    Should.new(self)
+  def yourself
+    self
   end
-  def should_s
-    Should.new(self.to_s)
+  def should(sym=:yourself)
+    Should.new(self.send(sym))
   end
 end
 
 # (end)
 
 if $0 == __FILE__ then
+  
+  # Self testing :)
+  
   1.should == 1
+  
+  begin
+    1.should == 2
+  rescue Exception => e
+    e.message.should == "Found 1 but expected 2"
+  end
   
   # Hash.method_missing hack
   
@@ -108,13 +139,25 @@ if $0 == __FILE__ then
   # Describtive statistics
   
   [1,2,3.3,3.4,4,5].sum.should == 18.7
-  [1,2,3.3,3.4,4,5].average.should_s == '3.11666666666667'
+  [1,2,3.3,3.4,4,5].mean.should(:f6) == '3.116667' 
+  [1,2,3.3,3.4,4,5].variance.should(:f6) == '2.033667'
+  [1,2,3.3,3.4,4,5].stdev.should(:f6) == '1.426067'
   
   # Percentile, you darn beast!
-  
+
+  [1,2,3,4,5].percentile(0).should == 1
+  [1,2,3,4,5].percentile(1).should == 5
   [1,2,3,4,5].percentile(0.25).should == 2
   [1,2,3,4,5].percentile(0.75).should == 4
   [1,2,3,4].percentile(0.5).should == 2.5
   [1,2].percentile(0.25).should == 1.25
+  
+  # Enumerabe.split_where
+  
+  f = Proc.new{|a,b|a != b}
+  [1,1,2,2,3,3].split_where(&f).should == [[1,1],[2,2],[3,3]]
+  [1,2,3].split_where(&f).should == [[1],[2],[3]]
+  [1].split_where(&f).should == [[1]]
+  [].split_where(&f).should == []
   
 end
